@@ -7,7 +7,11 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <style>
     :root { --main: #2563EB; --bg: #F1F5F9; --white: #ffffff; --border: #E2E8F0; --accent: #F59E0B; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); margin: 0; padding: 0 20px 20px; color: #334155; }
+    .site-header { position: sticky; top: 0; z-index: 1000; background: rgba(255,255,255,.95); border-bottom: 1px solid var(--border); margin: 0 -20px 20px; backdrop-filter: blur(8px); }
+    .site-header-inner { max-width: 1000px; margin: 0 auto; padding: 14px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .site-title { font-weight: 800; color: var(--main); cursor: pointer; font-size: 18px; }
+    .site-subtitle { font-size: 12px; color: #64748B; }
     .container { max-width: 1000px; margin: 0 auto; }
     .card { background: var(--white); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
     .page { display: none; } .active { display: block; }
@@ -15,6 +19,7 @@
     .btn-main { background: var(--main); color: white; width: 100%; }
     .btn-sub { background: #64748B; color: white; }
     .btn-danger { background: #EF4444; color: white; padding: 4px 8px; font-size: 12px; }
+    .btn-danger-wide { background:#EF4444; color:white; margin-left:8px; }
     .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
     .tab { flex: 1; text-align: center; padding: 12px; background: #E2E8F0; border-radius: 8px; cursor: pointer; }
     .tab.active { background: var(--main); color: white; }
@@ -43,6 +48,7 @@
   </style>
 </head>
 <body>
+<header class="site-header"><div class="site-header-inner"><div onclick="goHome()" title="プロジェクト選択へ戻る"><div class="site-title">劇団スケジュール管理</div><div class="site-subtitle">クリックでプロジェクト選択へ</div></div><button class="btn btn-sub" onclick="goHome()">プロジェクト選択へ</button></div></header>
 <div id="loading-overlay"><div class="loader-card"><div class="spinner"></div><div id="loading-text">通信中...</div></div></div>
 
 <div class="container">
@@ -123,7 +129,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbyS2EPFR7LdjPSH9sTnbVPMAyiU-g-VMTEezzmfK1_aEwkseQw4-tEz1W4SkOwAKCg7Gg/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbzBIG_wbzRW-vlQigD87fcunc-RFI-Sw3easOCO6b9NX8NzxXup7wUGArPPnLnSDWNOzA/exec";
   let currentProject = "";
   let appData = { cast: [], scenes: [], schedules: [] };
   let responses = [];
@@ -137,6 +143,10 @@
 
   function escapeHtml(str) {
     return String(str ?? "").replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
+  }
+
+  function jsString(str) {
+    return JSON.stringify(String(str ?? ""));
   }
 
   async function apiFetch(url, options) {
@@ -184,15 +194,40 @@
     return responses.find(res => res.name === name);
   }
 
+  function goHome() {
+    currentProject = "";
+    appData = { cast: [], scenes: [], schedules: [] };
+    responses = [];
+    document.getElementById('project-title').innerText = "劇団スケジュール管理";
+    document.getElementById('page-main').classList.remove('active');
+    document.getElementById('page-select').classList.add('active');
+    loadProjects();
+  }
+
+  async function deleteProject(name) {
+    if (!confirm(`プロジェクト「${name}」を削除します。スプレッドシート上のシートも消えます。本当に削除しますか？`)) return;
+    try {
+      await apiFetch(GAS_URL, { method: "POST", body: JSON.stringify({ type: "deleteProject", projectName: name }) });
+      if (currentProject === name) goHome();
+      else await loadProjects();
+      alert("プロジェクトを削除しました。");
+    } catch (err) {
+      alert('削除に失敗しました: ' + err.message);
+    }
+  }
+
   async function loadProjects() {
     try {
       const data = await apiFetch(GAS_URL);
       const projects = data.existingProjects || [];
       document.getElementById('project-list').innerHTML = projects.length
-        ? projects.map(p => `<button class="btn btn-sub project-btn" style="margin:5px;" data-project="${escapeHtml(p)}">${escapeHtml(p)}</button>`).join('')
+        ? projects.map(p => `<span style="display:inline-flex; align-items:center; gap:4px; margin:5px;"><button class="btn btn-sub project-btn" data-project="${escapeHtml(p)}">${escapeHtml(p)}</button><button class="btn btn-danger project-delete-btn" data-project="${escapeHtml(p)}">削除</button></span>`).join('')
         : 'まだプロジェクトがありません。';
       document.querySelectorAll('.project-btn').forEach(btn => {
         btn.addEventListener('click', () => enterProject(btn.dataset.project));
+      });
+      document.querySelectorAll('.project-delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => deleteProject(btn.dataset.project));
       });
     } catch (err) {
       alert('プロジェクト一覧の読み込みに失敗しました: ' + err.message);
@@ -243,6 +278,13 @@
     renderAll();
   }
 
+  function removeScene(idx) {
+    const sceneName = appData.scenes[idx]?.name || "このシーン";
+    if (!confirm(`「${sceneName}」を削除しますか？`)) return;
+    appData.scenes.splice(idx, 1);
+    renderAll();
+  }
+
   function toggleSceneMember(sIdx, cIdx) {
     const cName = appData.cast[cIdx];
     const s = appData.scenes[sIdx];
@@ -270,6 +312,40 @@
   function onStatusChange(idx) {
     const st = document.querySelector(`input[name="st-${idx}"]:checked`)?.value;
     document.getElementById(`t-${idx}`).style.display = st === '途中' ? 'block' : 'none';
+  }
+
+  function softValidateTimeInput(idx) {
+    const fromEl = document.getElementById('f-' + idx);
+    const toEl = document.getElementById('to-' + idx);
+    // HH:MMが5文字そろうまでは警告しない
+    if ((fromEl.value && fromEl.value.length < 5) || (toEl.value && toEl.value.length < 5)) return true;
+    return true;
+  }
+
+  function fillPreviousAttendance() {
+    const name = document.getElementById('member-select').value;
+    const r = getLatestResponse(name);
+    appData.schedules.forEach((s, idx) => {
+      document.querySelectorAll(`input[name="st-${idx}"]`).forEach(el => el.checked = false);
+      const box = document.getElementById(`t-${idx}`);
+      if (box) box.style.display = 'none';
+      const fromEl = document.getElementById('f-' + idx);
+      const toEl = document.getElementById('to-' + idx);
+      if (fromEl) fromEl.value = s.start;
+      if (toEl) toEl.value = s.end;
+
+      const ans = r?.answers?.[s.date];
+      if (!ans) return;
+      const parsed = parseAnswer(ans, s);
+      let value = parsed.status === '途中' ? '途中' : parsed.status;
+      const radio = document.querySelector(`input[name="st-${idx}"][value="${value}"]`);
+      if (radio) radio.checked = true;
+      if (parsed.status === '途中') {
+        if (box) box.style.display = 'block';
+        if (fromEl && parsed.start != null) fromEl.value = minToTime(parsed.start);
+        if (toEl && parsed.end != null) toEl.value = minToTime(parsed.end);
+      }
+    });
   }
 
   function validateTimeInput(idx) {
@@ -303,7 +379,7 @@
 
     document.getElementById('admin-scene-list').innerHTML = appData.scenes.map((s, sIdx) => `
       <div style="border:1px solid #ddd; padding:10px; margin-bottom:5px; border-radius:8px;">
-        <strong>${escapeHtml(s.name)}</strong><br>
+        <div style="display:flex; justify-content:space-between; gap:8px; align-items:center;"><strong>${escapeHtml(s.name)}</strong><button class="btn btn-danger" onclick="removeScene(${sIdx})">シーン削除</button></div>
         ${appData.cast.map((c, cIdx) => `
           <label style="font-size:12px; margin-right:5px;">
             <input type="checkbox" ${s.members.includes(c) ? 'checked' : ''} onchange="toggleSceneMember(${sIdx}, ${cIdx})">${escapeHtml(c)}
@@ -315,6 +391,7 @@
     document.getElementById('admin-schedule-list').innerHTML = appData.schedules.map(s => `<span class="chip">${escapeHtml(s.date)} ${escapeHtml(s.start)}〜${escapeHtml(s.end)}</span>`).join('');
 
     document.getElementById('member-select').innerHTML = '<option value="">名前を選択</option>' + appData.cast.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+    document.getElementById('member-select').onchange = fillPreviousAttendance;
     document.getElementById('member-schedule-list').innerHTML = appData.schedules.map((s, idx) => `
       <div class="date-item">
         <strong>${escapeHtml(s.date)}</strong> <small>(${escapeHtml(s.start)}〜${escapeHtml(s.end)})</small>
@@ -325,9 +402,9 @@
         </div>
         <div id="t-${idx}" class="time-input-group">
           参加できる時間：
-          <input type="time" id="f-${idx}" value="${escapeHtml(s.start)}" min="${escapeHtml(s.start)}" max="${escapeHtml(s.end)}" onchange="validateTimeInput(${idx})">
+          <input type="time" id="f-${idx}" value="${escapeHtml(s.start)}" min="${escapeHtml(s.start)}" max="${escapeHtml(s.end)}" onblur="validateTimeInput(${idx})" oninput="softValidateTimeInput(${idx})">
           〜
-          <input type="time" id="to-${idx}" value="${escapeHtml(s.end)}" min="${escapeHtml(s.start)}" max="${escapeHtml(s.end)}" onchange="validateTimeInput(${idx})">
+          <input type="time" id="to-${idx}" value="${escapeHtml(s.end)}" min="${escapeHtml(s.start)}" max="${escapeHtml(s.end)}" onblur="validateTimeInput(${idx})" oninput="softValidateTimeInput(${idx})">
           <div class="small-note">設定時間外は入力できません。</div>
         </div>
       </div>
@@ -438,8 +515,14 @@
 
     try {
       await apiFetch(GAS_URL, { method: "POST", body: JSON.stringify({ projectName: currentProject, name, answers }) });
+      const idx = responses.findIndex(r => r.name === name);
+      const updated = { name, answers, memo: "", timestamp: new Date().toISOString() };
+      if (idx >= 0) responses[idx] = updated;
+      else responses.push(updated);
+      renderAll();
+      document.getElementById('member-select').value = name;
+      fillPreviousAttendance();
       alert("送信完了！");
-      await enterProject(currentProject);
     } catch (err) {
       alert('送信に失敗しました: ' + err.message);
     }
