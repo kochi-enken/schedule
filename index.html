@@ -915,7 +915,7 @@
 
     .practice-section-title {
       margin: 0 0 8px;
-      font-size: 1.05rem;
+      font-size: 0.9rem;
       color: var(--text);
       font-weight: 700;
     }
@@ -1251,6 +1251,34 @@
       align-content: flex-start;
     }
 
+
+    /* v9.8: スマホで共有/削除ボタンが重ならないよう調整 */
+    @media (max-width: 640px) {
+      .project-card {
+        position: relative;
+      }
+
+      .project-share-btn,
+      .project-delete-btn-inline {
+        position: absolute !important;
+        right: 10px !important;
+        min-width: 58px;
+        justify-content: center;
+      }
+
+      .project-share-btn {
+        top: 10px !important;
+      }
+
+      .project-delete-btn-inline {
+        top: 46px !important;
+      }
+
+      .project-card .project-btn {
+        padding-right: 86px !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1317,7 +1345,7 @@
         <h3>シーンの登録</h3>
         <div style="display:flex; gap:10px;">
           <input type="text" id="scene-name" style="flex:1; padding:8px;" placeholder="シーン名（例：シーン１）">
-          <button class="btn btn-sub" onclick="addScene()">シーン追加</button>
+          <button class="btn btn-sub" onclick="addScene()">追加</button>
         </div>
         <div id="admin-scene-list" style="margin-top:10px;"></div>
       </div>
@@ -1328,7 +1356,7 @@
         <div style="margin-top:10px;">
           開始：<input type="time" id="start-time" value="18:30"> 〜
           終了：<input type="time" id="end-time" value="21:00">
-          <button class="btn btn-sub" onclick="addSchedule()">選択した日程を追加</button>
+          <button class="btn btn-sub" onclick="addSchedule()">追加</button>
         </div>
         <div id="admin-schedule-list" style="margin-top:10px;"></div>
       </div>
