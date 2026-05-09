@@ -6,43 +6,168 @@
   <title>劇団調整ポータル Pro - シーン自動判定付</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <style>
-    :root { --main: #2563EB; --bg: #F1F5F9; --white: #ffffff; --border: #E2E8F0; --accent: #F59E0B; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); margin: 0; padding: 0 20px 20px; color: #334155; }
-    .site-header { position: sticky; top: 0; z-index: 1000; background: #334155; border-bottom: 1px solid #1F2937; margin: 0 -20px 20px; box-shadow: 0 2px 10px rgba(15,23,42,.18); }
-    .site-header-inner { max-width: 1000px; margin: 0 auto; padding: 14px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    .site-title { font-weight: 800; color: #ffffff; cursor: pointer; font-size: 18px; letter-spacing: .02em; }
-    .site-subtitle { font-size: 12px; color: #CBD5E1; }
+    :root {
+      --main: #2563EB;
+      --main-dark: #1D4ED8;
+      --bg: #F6F8FB;
+      --white: #ffffff;
+      --border: #D7DDE6;
+      --border-soft: #E6EAF0;
+      --text: #111827;
+      --muted: #6B7280;
+      --muted-light: #9CA3AF;
+      --blue-soft: #EFF6FF;
+      --blue-border: #BFDBFE;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 0 20px 20px;
+      color: var(--text);
+    }
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #ffffff;
+      border-bottom: none;
+      margin: 0 -20px 20px;
+      box-shadow: none;
+    }
+    .site-header-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .site-title {
+      font-weight: 800;
+      color: #111827;
+      cursor: pointer;
+      font-size: 18px;
+      letter-spacing: .01em;
+    }
+    .site-subtitle, .muted-text {
+      font-size: 12px;
+      color: var(--muted);
+    }
     .container { max-width: 1000px; margin: 0 auto; }
-    .card { background: var(--white); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .page { display: none; } .active { display: block; }
-    .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .card {
+      background: var(--white);
+      padding: 20px;
+      border-radius: 18px;
+      box-shadow: none;
+      border: none;
+      margin-bottom: 20px;
+    }
+    h1, h2, h3, h4, strong { color: var(--text); }
+    p, small { color: var(--muted); }
+    .page { display: none; }
+    .active { display: block; }
+    input, select, textarea {
+      border: 1px solid var(--border) !important;
+      border-radius: 999px !important;
+      color: var(--text);
+      background: #ffffff;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #AFC3E8 !important;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, .08);
+    }
+    input[type="time"] {
+      padding: 6px 10px;
+      border: 1px solid var(--border) !important;
+      border-radius: 999px !important;
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.2s;
+    }
+    .btn:hover { filter: brightness(.97); }
     .btn-main { background: var(--main); color: white; width: 100%; }
-    .btn-sub { background: #64748B; color: white; }
-    .btn-danger { background: #EF4444; color: white; padding: 4px 8px; font-size: 12px; }
-    .btn-danger-wide { background:#EF4444; color:white; margin-left:8px; }
+    .btn-sub { background: var(--main); color: white; }
+    .btn-danger { background: #EEF2F7; color: #374151; padding: 4px 10px; font-size: 12px; }
+    .btn-danger-wide { background:#EEF2F7; color:#374151; margin-left:8px; }
     .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-    .tab { flex: 1; text-align: center; padding: 12px; background: #E2E8F0; border-radius: 8px; cursor: pointer; }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      background: #E9EEF5;
+      color: var(--muted);
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+    }
     .tab.active { background: var(--main); color: white; }
-    .proposal-box { background: #FFFBEB; border: 2px solid #FEF3C7; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
-    .proposal-item { background: white; padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 5px solid var(--accent); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .ok-badge { background: #DCFCE7; color: #166534; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
-    .date-item { border-bottom: 1px solid var(--border); padding: 15px 0; }
-    .chip { background: #EEF2FF; padding: 5px 10px; border-radius: 15px; display: inline-block; margin: 2px; font-size: 13px; border: 1px solid #C7D2FE; }
+    .proposal-box {
+      background: var(--white);
+      border: none;
+      border-radius: 22px;
+      padding: 18px;
+      margin-bottom: 20px;
+      box-shadow: none;
+    }
+    .proposal-box h3 { color: var(--text) !important; }
+    .proposal-box p { color: var(--muted) !important; }
+    .proposal-item {
+      background: white;
+      padding: 13px 14px;
+      border-radius: 16px;
+      margin-top: 10px;
+      border: none;
+      border-left: none;
+      box-shadow: none;
+    }
+    .ok-badge {
+      background: var(--blue-soft);
+      color: var(--main-dark);
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: none;
+    }
+    .date-item { border-bottom: none; padding: 15px 0; }
+    .chip {
+      background: #F8FAFC;
+      color: var(--text);
+      padding: 6px 11px;
+      border-radius: 999px;
+      display: inline-block;
+      margin: 3px;
+      font-size: 13px;
+      border: 1px solid var(--border-soft);
+    }
     .status-selector { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
-    .time-input-group { margin-top: 10px; background: #F8FAFC; padding: 10px; border-radius: 8px; display: none; }
-    input[type="time"] { padding: 5px; border: 1px solid var(--border); border-radius: 4px; }
+    .time-input-group {
+      margin-top: 10px;
+      background: #F8FAFC;
+      padding: 10px;
+      border-radius: 18px;
+      display: none;
+      color: var(--muted);
+    }
     table.cross-table { border-collapse: collapse; width: 100%; min-width: 650px; background: white; }
-    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
-    .cross-table th, .cross-table td { border: 1px solid var(--border); padding: 8px; text-align: center; vertical-align: middle; font-size: 13px; }
-    .cross-table th { background: #F8FAFC; position: sticky; top: 0; }
-    .cross-table td:first-child, .cross-table th:first-child { text-align: left; font-weight: bold; background: #F8FAFC; position: sticky; left: 0; z-index: 1; }
-    .mark-ok { color: #166534; font-weight: bold; }
-    .mark-ng { color: #991B1B; font-weight: bold; }
-    .mark-mid { color: #92400E; font-weight: bold; }
-    .small-note { font-size: 11px; color: #64748B; display: block; margin-top: 2px; }
-    #loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); display: none; align-items: center; justify-content: center; z-index: 9999; pointer-events: all; }
+    .table-wrap { overflow-x: auto; border: none; border-radius: 16px; }
+    .cross-table th, .cross-table td { border: none; padding: 8px; text-align: center; vertical-align: middle; font-size: 13px; }
+    .cross-table th { background: #F8FAFC; position: sticky; top: 0; color: var(--text); }
+    .cross-table td:first-child, .cross-table th:first-child { text-align: left; font-weight: bold; background: #F8FAFC; position: sticky; left: 0; z-index: 1; color: var(--text); }
+    .mark-ok, .mark-ng, .mark-mid { color: var(--text); font-weight: bold; }
+    .small-note { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; }
+    #loading-overlay { position: fixed; inset: 0; background: rgba(17, 24, 39, 0.35); display: none; align-items: center; justify-content: center; z-index: 9999; pointer-events: all; }
     #loading-overlay.active { display: flex; }
-    .loader-card { background: white; padding: 24px 32px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,.2); font-weight: bold; text-align: center; }
+    .loader-card { background: white; padding: 24px 32px; border-radius: 22px; box-shadow: none; border: none; font-weight: bold; text-align: center; color: var(--text); }
     .spinner { width: 28px; height: 28px; border: 4px solid #CBD5E1; border-top-color: var(--main); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 10px; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
@@ -52,18 +177,18 @@
 <div id="loading-overlay"><div class="loader-card"><div class="spinner"></div><div id="loading-text">通信中...</div></div></div>
 
 <div class="container">
-  <h1 id="project-title" style="display:none;"></h1>
+  <h1 id="project-title" style="display:none; font-size:1.08rem; color:#4B5563; font-weight:600; margin:0 0 16px;"></h1>
 
   <div id="page-select" class="page active">
     <div class="card">
-      <p style="margin-top:0; color:#64748B; line-height:1.7;">新しく管理したい稽古予定の名前を入力してください。例：5月の稽古、夏公演、通し稽古 など</p>
+      <p style="margin-top:0; color:var(--muted); line-height:1.7;">新しく管理したい稽古予定の名前を入力してください。例：5月の稽古、夏公演、通し稽古 など</p>
       <div style="display:flex; gap:10px; align-items:center; margin-bottom:22px;">
-        <input type="text" id="new-project-name" placeholder="例：5月の稽古、夏公演、通し稽古" style="flex:1; padding:10px; border-radius:6px; border:1px solid #ccc;">
+        <input type="text" id="new-project-name" placeholder="例：5月の稽古、夏公演、通し稽古" style="flex:1; padding:10px; border-radius:999px; border:1px solid var(--border);">
         <button class="btn btn-sub" onclick="initProject()">作成</button>
       </div>
 
-      <div style="border-top:1px solid var(--border); padding-top:18px;">
-        <p style="margin:0 0 10px; color:#64748B; font-size:0.9rem;">既存の稽古予定を選ぶ</p>
+      <div style="border-top:none; padding-top:18px;">
+        <p style="margin:0 0 10px; color:var(--muted); font-size:0.9rem;">既存の稽古予定を選ぶ</p>
         <div id="project-list">読み込み中...</div>
       </div>
     </div>
@@ -77,14 +202,14 @@
 
     <div id="view-admin" style="display:none;">
       <div class="proposal-box">
-        <h3 style="margin-top:0; color: #92400E;">💡 稽古可能なシーンの提案</h3>
-        <p style="font-size: 0.85rem; color: #B45309;">途中参加・途中帰宅がある場合は、全員が重なる時間も表示します。</p>
+        <h3 style="margin-top:0; color: var(--text);">稽古可能なシーンの提案</h3>
+        <p style="font-size: 0.85rem; color: var(--muted);">途中参加・途中帰宅がある場合は、全員が重なる時間も表示します。</p>
         <div id="proposal-list">回答を読み込み中...</div>
       </div>
 
       <div class="card">
-        <h3>📊 出欠クロス表</h3>
-        <p style="font-size:0.85rem; color:#64748B;">縦：役者名、横：日程。参加は◯、不参加は×、途中参加・途中帰宅は△で表示します。</p>
+        <h3>出欠表</h3>
+        <p style="font-size:0.85rem; color:var(--muted);">縦：役者名、横：日程。参加は◯、不参加は×、途中参加・途中帰宅は△で表示します。</p>
         <div id="attendance-cross-table"></div>
       </div>
 
@@ -98,9 +223,9 @@
       </div>
 
       <div class="card">
-        <h3>2. シーンの登録（香盤）</h3>
+        <h3>2. シーンの登録</h3>
         <div style="display:flex; gap:10px;">
-          <input type="text" id="scene-name" style="flex:1; padding:8px;" placeholder="シーン名（例：1幕2場）">
+          <input type="text" id="scene-name" style="flex:1; padding:8px;" placeholder="シーン名（例：シーン1）">
           <button class="btn btn-sub" onclick="addScene()">シーン追加</button>
         </div>
         <div id="admin-scene-list" style="margin-top:10px;"></div>
@@ -246,7 +371,7 @@
   async function enterProject(name) {
     currentProject = name;
     document.getElementById('project-title').style.display = "block";
-    document.getElementById('project-title').innerText = "公演：" + name;
+    document.getElementById('project-title').innerText = name;
     document.getElementById('page-select').classList.remove('active');
     document.getElementById('page-main').classList.add('active');
     try {
@@ -386,7 +511,7 @@
       : '<small>まだ役者が登録されていません。</small>';
 
     document.getElementById('admin-scene-list').innerHTML = appData.scenes.map((s, sIdx) => `
-      <div style="border:1px solid #ddd; padding:10px; margin-bottom:5px; border-radius:8px;">
+      <div style="border:none; background:#F8FAFC; padding:10px; margin-bottom:5px; border-radius:999px;">
         <div style="display:flex; justify-content:space-between; gap:8px; align-items:center;"><strong>${escapeHtml(s.name)}</strong><button class="btn btn-danger" onclick="removeScene(${sIdx})">シーン削除</button></div>
         ${appData.cast.map((c, cIdx) => `
           <label style="font-size:12px; margin-right:5px;">
@@ -463,7 +588,7 @@
       if (sceneItems.length > 0) {
         html += `
           <div class="proposal-item">
-            <strong>📅 ${escapeHtml(sched.date)}</strong> <span class="ok-badge">稽古可能</span><br>
+            <strong>${escapeHtml(sched.date)}</strong> <span class="ok-badge">稽古可能</span><br>
             <small>${sceneItems.join('<br>')}</small>
           </div>`;
       }
