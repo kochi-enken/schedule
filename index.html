@@ -170,6 +170,308 @@
     .loader-card { background: white; padding: 24px 32px; border-radius: 22px; box-shadow: none; border: none; font-weight: bold; text-align: center; color: var(--text); }
     .spinner { width: 28px; height: 28px; border: 4px solid #CBD5E1; border-top-color: var(--main); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 10px; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    .chip {
+      border: none !important;
+      padding: 6px 12px;
+    }
+    .chip .chip-delete {
+      background: transparent !important;
+      color: var(--muted);
+      border: none !important;
+      padding: 0 0 0 6px !important;
+      margin: 0;
+      font-size: 14px;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 0;
+    }
+    .chip .chip-delete:hover {
+      color: var(--text);
+      filter: none;
+    }
+    input, select, textarea {
+      padding-left: 16px !important;
+    }
+    input::placeholder, textarea::placeholder {
+      color: var(--muted-light);
+      padding-left: 4px;
+    }
+    .scene-box {
+      border: none;
+      background: #F8FAFC;
+      padding: 12px 10px 12px 24px;
+      margin-bottom: 5px;
+      border-radius: 999px;
+    }
+    .scene-members {
+      padding-left: 8px;
+      margin-top: 4px;
+    }
+
+    .scene-box {
+      border-radius: 18px !important;
+      padding: 14px 14px 14px 24px !important;
+    }
+    .scene-head {
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:center;
+      padding-right: 4px;
+    }
+    .scene-title-row {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-width: 0;
+    }
+    .scene-order-controls {
+      display:inline-flex;
+      gap:4px;
+      align-items:center;
+    }
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 800;
+      padding: 2px 5px;
+      font-size: 14px;
+      line-height: 1;
+      border-radius: 999px;
+    }
+    .icon-btn:hover {
+      color: var(--text);
+      background: #EEF2F7;
+      filter: none;
+    }
+    .member-toggle-list {
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      padding-left: 8px;
+      margin-top: 8px;
+    }
+    .toggle-btn {
+      border: none;
+      background: #EEF2F7;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .15s;
+    }
+    .toggle-btn.active {
+      background: var(--main);
+      color: white;
+    }
+    .attendance-buttons {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .attendance-btn {
+      border: none;
+      background: #EEF2F7;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .15s;
+    }
+    .attendance-btn.active {
+      background: var(--main);
+      color: white;
+    }
+    .time-label {
+      display:block;
+      padding-left: 10px;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .time-input-group .small-note {
+      padding-left: 10px;
+      margin-top: 6px;
+    }
+
+    .drag-handle {
+      width: 26px;
+      height: 26px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: grab;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border-radius: 999px;
+    }
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+    .hamburger-lines,
+    .hamburger-lines::before,
+    .hamburger-lines::after {
+      display: block;
+      width: 15px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 999px;
+      content: "";
+    }
+    .hamburger-lines {
+      position: relative;
+    }
+    .hamburger-lines::before {
+      position: absolute;
+      top: -5px;
+      left: 0;
+    }
+    .hamburger-lines::after {
+      position: absolute;
+      top: 5px;
+      left: 0;
+    }
+    .scene-box.dragging {
+      opacity: .55;
+    }
+    .toggle-btn {
+      background: var(--bg) !important;
+      border: 1px solid #E1E6EE !important;
+      color: var(--muted) !important;
+    }
+    .toggle-btn.active {
+      background: var(--main) !important;
+      border-color: var(--main) !important;
+      color: white !important;
+    }
+
+
+    /* v4.6: シーン並び替えハンドル・削除ボタンの位置調整 */
+    .scene-box {
+      position: relative;
+      padding-left: 40px !important;
+      padding-right: 38px !important;
+    }
+    .scene-head {
+      position: static !important;
+      padding-right: 0 !important;
+    }
+    .scene-title-row {
+      padding-left: 0 !important;
+      gap: 6px !important;
+    }
+    .drag-handle {
+      position: absolute !important;
+      left: 12px !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      width: 16px !important;
+      height: 20px !important;
+      color: var(--muted-light) !important;
+    }
+    .hamburger-lines,
+    .hamburger-lines::before,
+    .hamburger-lines::after {
+      width: 10px !important;
+      height: 1.2px !important;
+    }
+    .hamburger-lines::before {
+      top: -3.6px !important;
+    }
+    .hamburger-lines::after {
+      top: 3.6px !important;
+    }
+    .scene-head > .icon-btn {
+      position: absolute !important;
+      right: 12px !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 20px !important;
+      height: 20px !important;
+      padding: 0 !important;
+    }
+
+
+    /* v4.8: シーンカードの縦方向ドラッグ */
+    #admin-scene-list {
+      position: relative;
+    }
+    .scene-box {
+      transition: transform .18s ease, box-shadow .18s ease, margin .18s ease;
+      user-select: none;
+      touch-action: none;
+    }
+    .scene-box.scene-dragging {
+      transform: scale(1.018) !important;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14) !important;
+      opacity: 1 !important;
+      z-index: 3000 !important;
+      pointer-events: none;
+    }
+    .scene-drag-placeholder {
+      background: transparent;
+      border-radius: 18px;
+      transition: height .18s ease, margin .18s ease;
+      margin-bottom: 5px;
+    }
+    .drag-handle {
+      touch-action: none;
+    }
+
+
+    /* v4.9: 拡大なし・前面表示・半分重なったら入れ替え */
+    .scene-box.scene-dragging {
+      transform: none !important;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14) !important;
+      opacity: 1 !important;
+      z-index: 3000 !important;
+      pointer-events: none;
+    }
+
+
+    /* v5.0: 入れ替え時の滑らかな移動・削除ボタン操作安定化 */
+    .scene-box {
+      will-change: transform;
+    }
+    .scene-box.scene-dragging {
+      transform: none !important;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14) !important;
+      opacity: 1 !important;
+      z-index: 5000 !important;
+      pointer-events: none !important;
+    }
+    .scene-head > .icon-btn {
+      pointer-events: auto !important;
+      z-index: 20 !important;
+    }
+
+
+    /* v5.2: ドラッグ中の周辺カードをtransformで滑らかに移動 */
+    .scene-box {
+      transition: transform .18s cubic-bezier(.2, .8, .2, 1), box-shadow .18s ease !important;
+    }
+    .scene-box.shift-up {
+      transform: translateY(calc(-1 * var(--drag-gap, 0px)));
+    }
+    .scene-box.shift-down {
+      transform: translateY(var(--drag-gap, 0px));
+    }
+
   </style>
 </head>
 <body>
@@ -181,9 +483,9 @@
 
   <div id="page-select" class="page active">
     <div class="card">
-      <p style="margin-top:0; color:var(--muted); line-height:1.7;">新しく管理したい稽古予定の名前を入力してください。例：5月の稽古、夏公演、通し稽古 など</p>
+      <p style="margin-top:0; color:var(--muted); line-height:1.7;">新しく管理したい稽古の予定を入力してください。</p>
       <div style="display:flex; gap:10px; align-items:center; margin-bottom:22px;">
-        <input type="text" id="new-project-name" placeholder="例：5月の稽古、夏公演、通し稽古" style="flex:1; padding:10px; border-radius:999px; border:1px solid var(--border);">
+        <input type="text" id="new-project-name" placeholder="例：5月の稽古" style="flex:1; padding:10px; border-radius:999px; border:1px solid var(--border);">
         <button class="btn btn-sub" onclick="initProject()">作成</button>
       </div>
 
@@ -209,7 +511,6 @@
 
       <div class="card">
         <h3>出欠表</h3>
-        <p style="font-size:0.85rem; color:var(--muted);">縦：役者名、横：日程。参加は◯、不参加は×、途中参加・途中帰宅は△で表示します。</p>
         <div id="attendance-cross-table"></div>
       </div>
 
@@ -225,7 +526,7 @@
       <div class="card">
         <h3>2. シーンの登録</h3>
         <div style="display:flex; gap:10px;">
-          <input type="text" id="scene-name" style="flex:1; padding:8px;" placeholder="シーン名（例：シーン1）">
+          <input type="text" id="scene-name" style="flex:1; padding:8px;" placeholder="シーン名（例：シーン１）">
           <button class="btn btn-sub" onclick="addScene()">シーン追加</button>
         </div>
         <div id="admin-scene-list" style="margin-top:10px;"></div>
@@ -418,6 +719,149 @@
     renderAll();
   }
 
+  function moveScene(idx, direction) {
+    const newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= appData.scenes.length) return;
+    const tmp = appData.scenes[idx];
+    appData.scenes[idx] = appData.scenes[newIdx];
+    appData.scenes[newIdx] = tmp;
+    renderAll();
+  }
+
+
+
+  let sceneDragState = null;
+
+  function startScenePointerDrag(event, idx) {
+    event.preventDefault();
+
+    const box = event.currentTarget.closest('.scene-box');
+    const list = document.getElementById('admin-scene-list');
+    if (!box || !list) return;
+
+    const rect = box.getBoundingClientRect();
+    const listRect = list.getBoundingClientRect();
+    const placeholder = document.createElement('div');
+    placeholder.className = 'scene-drag-placeholder';
+    placeholder.style.height = rect.height + 'px';
+
+    box.after(placeholder);
+    box.classList.add('scene-dragging');
+
+    box.style.position = 'fixed';
+    box.style.left = rect.left + 'px';
+    box.style.top = rect.top + 'px';
+    box.style.width = rect.width + 'px';
+    box.style.margin = '0';
+    box.style.zIndex = '3000';
+
+    sceneDragState = {
+      box,
+      list,
+      placeholder,
+      originalIndex: idx,
+      offsetY: event.clientY - rect.top,
+      minTop: listRect.top,
+      maxTop: listRect.bottom - rect.height,
+      height: rect.height
+    };
+
+    window.addEventListener('pointermove', onScenePointerMove);
+    window.addEventListener('pointerup', endScenePointerDrag, { once: true });
+    window.addEventListener('pointercancel', endScenePointerDrag, { once: true });
+  }
+
+
+  function clearSceneShifts() {
+    document.querySelectorAll('#admin-scene-list .scene-box').forEach(el => {
+      el.classList.remove('shift-up', 'shift-down');
+      el.style.removeProperty('--drag-gap');
+    });
+  }
+
+  function onScenePointerMove(event) {
+    if (!sceneDragState) return;
+
+    const st = sceneDragState;
+    const nextTop = Math.min(Math.max(event.clientY - st.offsetY, st.minTop), st.maxTop);
+    st.box.style.top = nextTop + 'px';
+
+    const dragTop = nextTop;
+    const dragBottom = nextTop + st.height;
+    const children = Array.from(st.list.children);
+    const placeholderIndex = children.indexOf(st.placeholder);
+    const items = Array.from(st.list.querySelectorAll('.scene-box:not(.scene-dragging)'));
+
+    let targetMove = null;
+
+    for (const item of items) {
+      const r = item.getBoundingClientRect();
+      const mid = r.top + r.height / 2;
+      const itemIndex = Array.from(st.list.children).indexOf(item);
+
+      if (placeholderIndex < itemIndex && dragBottom > mid) {
+        targetMove = { item, direction: 'down' };
+        break;
+      }
+
+      if (placeholderIndex > itemIndex && dragTop < mid) {
+        targetMove = { item, direction: 'up' };
+        break;
+      }
+    }
+
+    clearSceneShifts();
+
+    if (!targetMove) return;
+
+    const movingHeight = st.placeholder.getBoundingClientRect().height + 5;
+    targetMove.item.style.setProperty('--drag-gap', movingHeight + 'px');
+    targetMove.item.classList.add(targetMove.direction === 'down' ? 'shift-up' : 'shift-down');
+
+    window.clearTimeout(st.swapTimer);
+    st.swapTimer = window.setTimeout(() => {
+      if (!sceneDragState) return;
+
+      clearSceneShifts();
+
+      if (targetMove.direction === 'down') {
+        targetMove.item.after(st.placeholder);
+      } else {
+        st.list.insertBefore(st.placeholder, targetMove.item);
+      }
+    }, 115);
+  }
+
+  function endScenePointerDrag() {
+    if (!sceneDragState) return;
+
+    clearSceneShifts();
+    const st = sceneDragState;
+    const oldIndex = st.originalIndex;
+
+    const orderedBoxes = Array.from(st.list.children).filter(el =>
+      el.classList.contains('scene-box') || el.classList.contains('scene-drag-placeholder')
+    );
+
+    const newIndex = orderedBoxes.indexOf(st.placeholder);
+
+    st.box.classList.remove('scene-dragging');
+    st.box.removeAttribute('style');
+    st.list.insertBefore(st.box, st.placeholder);
+    st.placeholder.remove();
+
+    window.removeEventListener('pointermove', onScenePointerMove);
+
+    sceneDragState = null;
+
+    if (newIndex >= 0 && newIndex !== oldIndex) {
+      const moved = appData.scenes.splice(oldIndex, 1)[0];
+      appData.scenes.splice(newIndex, 0, moved);
+    }
+
+    renderAll();
+  }
+
   function toggleSceneMember(sIdx, cIdx) {
     const cName = appData.cast[cIdx];
     const s = appData.scenes[sIdx];
@@ -442,10 +886,29 @@
     renderAll();
   }
 
+  function removeSchedule(idx) {
+    const sched = appData.schedules[idx];
+    if (!sched) return;
+    if (!confirm(`${sched.date} ${sched.start}〜${sched.end} を削除しますか？`)) return;
+    appData.schedules.splice(idx, 1);
+    renderAll();
+  }
+
+
   function onStatusChange(idx) {
     const st = document.querySelector(`input[name="st-${idx}"]:checked`)?.value;
     document.getElementById(`t-${idx}`).style.display = st === '途中' ? 'block' : 'none';
   }
+
+  function setAttendanceStatus(idx, value) {
+    const radio = document.querySelector(`input[name="st-${idx}"][value="${value}"]`);
+    if (radio) radio.checked = true;
+    onStatusChange(idx);
+    document.querySelectorAll(`#attendance-buttons-${idx} .attendance-btn`).forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.value === value);
+    });
+  }
+
 
   function softValidateTimeInput(idx) {
     const fromEl = document.getElementById('f-' + idx);
@@ -460,6 +923,7 @@
     const r = getLatestResponse(name);
     appData.schedules.forEach((s, idx) => {
       document.querySelectorAll(`input[name="st-${idx}"]`).forEach(el => el.checked = false);
+      document.querySelectorAll(`#attendance-buttons-${idx} .attendance-btn`).forEach(btn => btn.classList.remove('active'));
       const box = document.getElementById(`t-${idx}`);
       if (box) box.style.display = 'none';
       const fromEl = document.getElementById('f-' + idx);
@@ -473,6 +937,9 @@
       let value = parsed.status === '途中' ? '途中' : parsed.status;
       const radio = document.querySelector(`input[name="st-${idx}"][value="${value}"]`);
       if (radio) radio.checked = true;
+      document.querySelectorAll(`#attendance-buttons-${idx} .attendance-btn`).forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.value === value);
+      });
       if (parsed.status === '途中') {
         if (box) box.style.display = 'block';
         if (fromEl && parsed.start != null) fromEl.value = minToTime(parsed.start);
@@ -507,34 +974,45 @@
 
   function renderAll() {
     document.getElementById('admin-cast-list').innerHTML = appData.cast.length
-      ? appData.cast.map((c, idx) => `<span class="chip">${escapeHtml(c)} <button class="btn btn-danger" onclick="removeCast(${idx})">×</button></span>`).join('')
+      ? appData.cast.map((c, idx) => `<span class="chip">${escapeHtml(c)} <button class="chip-delete" onclick="removeCast(${idx})" aria-label="役者を削除">×</button></span>`).join('')
       : '<small>まだ役者が登録されていません。</small>';
 
     document.getElementById('admin-scene-list').innerHTML = appData.scenes.map((s, sIdx) => `
-      <div style="border:none; background:#F8FAFC; padding:10px; margin-bottom:5px; border-radius:999px;">
-        <div style="display:flex; justify-content:space-between; gap:8px; align-items:center;"><strong>${escapeHtml(s.name)}</strong><button class="btn btn-danger" onclick="removeScene(${sIdx})">シーン削除</button></div>
-        ${appData.cast.map((c, cIdx) => `
-          <label style="font-size:12px; margin-right:5px;">
-            <input type="checkbox" ${s.members.includes(c) ? 'checked' : ''} onchange="toggleSceneMember(${sIdx}, ${cIdx})">${escapeHtml(c)}
-          </label>
-        `).join('')}
+      <div class="scene-box" data-scene-index="${sIdx}">
+        <div class="scene-head">
+          <div class="scene-title-row">
+            <button type="button" class="drag-handle" title="ドラッグして並び替え" aria-label="ドラッグして並び替え" onpointerdown="startScenePointerDrag(event, ${sIdx})">
+              <span class="hamburger-lines"></span>
+            </button>
+            <strong>${escapeHtml(s.name)}</strong>
+          </div>
+          <button type="button" class="icon-btn" onclick="event.stopPropagation(); removeScene(${sIdx})" aria-label="シーンを削除">×</button>
+        </div>
+        <div class="member-toggle-list">
+          ${appData.cast.map((c, cIdx) => `
+            <button type="button" class="toggle-btn ${s.members.includes(c) ? 'active' : ''}" onclick="toggleSceneMember(${sIdx}, ${cIdx})">${escapeHtml(c)}</button>
+          `).join('')}
+        </div>
       </div>
     `).join('');
 
-    document.getElementById('admin-schedule-list').innerHTML = appData.schedules.map(s => `<span class="chip">${escapeHtml(s.date)} ${escapeHtml(s.start)}〜${escapeHtml(s.end)}</span>`).join('');
+    document.getElementById('admin-schedule-list').innerHTML = appData.schedules.map((s, idx) => `<span class="chip">${escapeHtml(s.date)} ${escapeHtml(s.start)}〜${escapeHtml(s.end)} <button class="chip-delete" onclick="removeSchedule(${idx})" aria-label="日程を削除">×</button></span>`).join('');
 
     document.getElementById('member-select').innerHTML = '<option value="">名前を選択</option>' + appData.cast.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
     document.getElementById('member-select').onchange = fillPreviousAttendance;
     document.getElementById('member-schedule-list').innerHTML = appData.schedules.map((s, idx) => `
       <div class="date-item">
         <strong>${escapeHtml(s.date)}</strong> <small>(${escapeHtml(s.start)}〜${escapeHtml(s.end)})</small>
-        <div class="status-selector">
-          <label><input type="radio" name="st-${idx}" value="参加" onchange="onStatusChange(${idx})"> 参加</label>
-          <label><input type="radio" name="st-${idx}" value="不参加" onchange="onStatusChange(${idx})"> 不参加</label>
-          <label><input type="radio" name="st-${idx}" value="途中" onchange="onStatusChange(${idx})"> 途中参加・途中帰宅</label>
+        <div class="attendance-buttons" id="attendance-buttons-${idx}">
+          <input type="radio" name="st-${idx}" value="参加" onchange="onStatusChange(${idx})" style="display:none;">
+          <input type="radio" name="st-${idx}" value="不参加" onchange="onStatusChange(${idx})" style="display:none;">
+          <input type="radio" name="st-${idx}" value="途中" onchange="onStatusChange(${idx})" style="display:none;">
+          <button type="button" class="attendance-btn" data-value="参加" onclick="setAttendanceStatus(${idx}, '参加')">参加</button>
+          <button type="button" class="attendance-btn" data-value="不参加" onclick="setAttendanceStatus(${idx}, '不参加')">不参加</button>
+          <button type="button" class="attendance-btn" data-value="途中" onclick="setAttendanceStatus(${idx}, '途中')">途中参加・途中帰宅</button>
         </div>
         <div id="t-${idx}" class="time-input-group">
-          参加できる時間：
+          <span class="time-label">参加できる時間</span>
           <input type="time" id="f-${idx}" value="${escapeHtml(s.start)}" min="${escapeHtml(s.start)}" max="${escapeHtml(s.end)}" onblur="validateTimeInput(${idx})" oninput="softValidateTimeInput(${idx})">
           〜
           <input type="time" id="to-${idx}" value="${escapeHtml(s.end)}" min="${escapeHtml(s.start)}" max="${escapeHtml(s.end)}" onblur="validateTimeInput(${idx})" oninput="softValidateTimeInput(${idx})">
