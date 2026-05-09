@@ -3,239 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>劇団DXポータル - 公演管理システム</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ja.js"></script>
-
+    <title>劇団DX - プロジェクト管理</title>
     <style>
-        :root { 
-            --base-bg: #F1F5F9;       --main-dark: #0F172A;     --accent-blue: #2563EB;   
-            --text-main: #334155;     --white: #ffffff;         --green-success: #059669;
-            --border-color: #E2E8F0;  --purple: #7C3AED;
-        }
-
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: var(--base-bg); color: var(--text-main); margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
+        :root { --main: #2563EB; --bg: #F8FAFC; --dark: #1E293B; --border: #E2E8F0; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--dark); margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid var(--border); }
+        .page { display: none; }
+        .active { display: block; }
         
-        /* セクション管理 */
-        .page { display: none; animation: fadeIn 0.3s ease-in-out; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .card { background: var(--white); padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid var(--border-color); }
-        h1 { text-align: center; color: var(--main-dark); font-size: 1.8rem; margin-bottom: 30px; }
-        h2 { border-left: 5px solid var(--accent-blue); padding-left: 15px; font-size: 1.2rem; margin-bottom: 20px; }
-
-        /* ボタン・入力UI */
-        .btn { padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; text-decoration: none; display: inline-block; text-align: center; }
-        .btn-primary { background: var(--accent-blue); color: white; }
-        .btn-success { background: var(--green-success); color: white; }
-        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
-        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-
-        input[type="text"], select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
-
-        /* プロジェクト選択画面 */
-        .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .project-card { background: white; padding: 20px; border-radius: 12px; border: 2px solid transparent; cursor: pointer; transition: 0.3s; text-align: center; }
-        .project-card:hover { border-color: var(--accent-blue); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .project-card h3 { margin: 0 0 10px 0; color: var(--main-dark); }
-
-        /* スピナー */
-        #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--accent-blue); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* 出欠テーブル */
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; border: 1px solid var(--border-color); text-align: center; }
-        th { background: #F8FAFC; font-size: 0.8rem; }
-        .cell-ok { color: var(--accent-blue); font-weight: bold; }
-        .cell-ng { color: #EF4444; font-weight: bold; }
-
-        /* モード切替タブ */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { flex: 1; padding: 10px; background: #E2E8F0; border-radius: 8px; cursor: pointer; font-weight: bold; text-align: center; }
-        .tab-btn.active { background: var(--main-dark); color: white; }
+        /* 管理画面用スタイル */
+        .admin-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .chip { display: inline-block; background: #EEF2FF; color: var(--main); padding: 4px 12px; border-radius: 20px; margin: 4px; font-size: 14px; border: 1px solid #C7D2FE; }
+        .scene-card { border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-top: 10px; }
+        .cast-check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
+        
+        .btn { padding: 10px 20px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold; }
+        .btn-main { background: var(--main); color: white; }
+        .btn-sub { background: #64748B; color: white; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; background: #E2E8F0; padding: 5px; border-radius: 10px; }
+        .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 8px; }
+        .tab.active { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input[type="text"] { padding: 8px; border: 1px solid var(--border); border-radius: 4px; flex-grow: 1; }
     </style>
 </head>
 <body>
 
-<div id="loader">
-    <div class="spinner"></div>
-    <p>通信中...</p>
-</div>
-
 <div class="container">
-    <h1>🎭 劇団スケジュール調整ポータル</h1>
+    <h1 id="title">📂 公演プロジェクト選択</h1>
 
-    <!-- 1. プロジェクト選択画面 -->
-    <div id="page-projects" class="page active">
+    <!-- ページ1：プロジェクト選択 -->
+    <div id="page-select" class="page active">
         <div class="card">
-            <h2>公演（プロジェクト）を選択</h2>
-            <div class="project-grid" id="projectList">
-                <!-- ここに既存のシートが並ぶ -->
-            </div>
-            <hr style="margin: 30px 0; border: 0; border-top: 1px solid #ddd;">
-            <h2>新しい公演を作成</h2>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="newProjectName" placeholder="例：2026年夏公演">
-                <button class="btn btn-primary" onclick="createNewProject()">作成</button>
+            <h3>既存のプロジェクト</h3>
+            <div id="project-list">読み込み中...</div>
+            <hr>
+            <h3>新規作成</h3>
+            <div class="admin-row">
+                <input type="text" id="new-project-name" placeholder="公演名を入力">
+                <button class="btn btn-main" onclick="initProject()">作成</button>
             </div>
         </div>
     </div>
 
-    <!-- 2. メイン操作画面（演出・役者共通） -->
+    <!-- ページ2：メイン管理/回答画面 -->
     <div id="page-main" class="page">
-        <div style="margin-bottom: 20px;">
-            <button class="btn btn-outline" onclick="showPage('projects')">← 公演選択に戻る</button>
-            <span id="currentProjectTitle" style="margin-left: 15px; font-weight: bold; font-size: 1.2rem;"></span>
-        </div>
-
+        <button class="btn btn-sub" onclick="location.reload()" style="margin-bottom:10px;">← 戻る</button>
+        
         <div class="tabs">
-            <div id="tab-member" class="tab-btn active" onclick="switchMode('member')">役者：出欠回答</div>
-            <div id="tab-admin" class="tab-btn" onclick="switchMode('admin')">演出：設定・管理</div>
+            <div id="tab-member" class="tab active" onclick="switchTab('member')">役者：回答</div>
+            <div id="tab-admin" class="tab" onclick="switchTab('admin')">演出：設定</div>
         </div>
 
-        <!-- 役者モード -->
-        <div id="mode-member" class="mode-content">
+        <!-- 演出設定モード -->
+        <div id="view-admin" style="display:none;">
             <div class="card">
-                <h2>自分の出欠を入力する</h2>
-                <input type="text" id="memberName" placeholder="あなたの名前を選択または入力" list="castOptions">
-                <datalist id="castOptions"></datalist>
-                <div id="dateForms" style="margin-top:20px;"></div>
-                <button class="btn btn-success" style="width:100%; margin-top:20px;" onclick="submitData()">回答を送信する</button>
+                <h2>1. 役者の登録</h2>
+                <div class="admin-row">
+                    <input type="text" id="input-cast" placeholder="役者名">
+                    <button class="btn btn-main" onclick="addCast()">追加</button>
+                </div>
+                <div id="cast-container"></div>
             </div>
-        </div>
 
-        <!-- 演出モード -->
-        <div id="mode-admin" class="mode-content" style="display:none;">
             <div class="card">
-                <h2>メンバー・シーン・日程の設定</h2>
-                <p style="font-size: 0.8rem; color: #666;">※ここでの変更は「保存」を押すまでサーバーに反映されません。</p>
-                <!-- 役者登録UIなどは簡略化してここに入れます -->
-                <button class="btn btn-primary" onclick="syncSettings()">現在の設定をサーバーに保存</button>
+                <h2>2. シーンの登録と香盤（誰が出るか）</h2>
+                <div class="admin-row">
+                    <input type="text" id="input-scene" placeholder="シーン名（例：1幕1場）">
+                    <button class="btn btn-main" onclick="addScene()">シーン追加</button>
+                </div>
+                <div id="scene-container"></div>
             </div>
+            
+            <button class="btn btn-main" style="width:100%; font-size:1.2rem; padding:15px;" onclick="saveAllSettings()">☝ 設定をサーバーに保存</button>
         </div>
 
-        <!-- 出欠まとめ（常に表示） -->
-        <div class="card">
-            <h2>現在の出欠状況</h2>
-            <div class="table-wrapper">
-                <table id="resTable">
-                    <thead id="tHead"></thead>
-                    <tbody id="tBody"></tbody>
-                </table>
+        <!-- 役者回答モード -->
+        <div id="view-member">
+            <div class="card">
+                <h2>出欠の回答</h2>
+                <select id="select-member-name" style="width:100%; padding:10px; margin-bottom:15px;">
+                    <option value="">自分の名前を選択してください</option>
+                </select>
+                <div id="answer-fields"></div>
+                <button class="btn btn-main" style="width:100%;" onclick="submitAttendance()">回答を送信</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- 【重要】あなたのGAS URLをここに貼ってください ---
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbwBEg8Ibp65FT0sgdkOnsz8pVQXUAMEVdKwYPnHBu059-IdZIOnLfuzCklrubSnJQ_Log/exec";
-
+    const GAS_URL = "あなたのGASのURL";
     let currentProject = "";
-    let projects = [];
-    let responses = [];
+    let appData = { cast: [], scenes: [] };
 
-    // 起動時：プロジェクト一覧を取得
-    window.onload = async function() {
-        toggleLoader(true);
-        try {
-            const res = await fetch(GAS_URL);
-            const data = await res.json();
-            projects = data.existingProjects || [];
-            renderProjectList();
-        } catch (e) {
-            alert("通信失敗。GASの設定を確認してください。");
+    // --- 初期化 ---
+    async function loadProjects() {
+        const res = await fetch(GAS_URL);
+        const data = await res.json();
+        const listDiv = document.getElementById('project-list');
+        listDiv.innerHTML = data.existingProjects.map(p => 
+            `<button class="btn btn-sub" style="margin:5px;" onclick="enterProject('${p}')">${p}</button>`
+        ).join('');
+    }
+    loadProjects();
+
+    async function enterProject(name) {
+        currentProject = name;
+        document.getElementById('title').innerText = "公演：" + name;
+        document.getElementById('page-select').classList.remove('active');
+        document.getElementById('page-main').classList.add('active');
+        
+        // 既存設定の読み込み
+        const res = await fetch(`${GAS_URL}?project=${encodeURIComponent(name)}`);
+        const data = await res.json();
+        if(data.settings) {
+            appData = data.settings;
+            renderAdmin();
+            renderMemberUI();
         }
-        toggleLoader(false);
-    };
-
-    function toggleLoader(show) {
-        document.getElementById('loader').style.display = show ? 'flex' : 'none';
     }
 
-    function showPage(pageId) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById('page-' + pageId).classList.add('active');
+    function initProject() {
+        const name = document.getElementById('new-project-name').value;
+        if(name) enterProject(name);
     }
 
-    function renderProjectList() {
-        const list = document.getElementById('projectList');
-        list.innerHTML = projects.map(p => `
-            <div class="project-card" onclick="selectProject('${p}')">
-                <h3>📂 ${p}</h3>
-                <span class="btn btn-outline" style="padding:5px 10px; font-size:0.8rem;">開く</span>
+    // --- 演出設定ロジック ---
+    function addCast() {
+        const name = document.getElementById('input-cast').value;
+        if(!name) return;
+        appData.cast.push(name);
+        document.getElementById('input-cast').value = "";
+        renderAdmin();
+    }
+
+    function addScene() {
+        const name = document.getElementById('input-scene').value;
+        if(!name) return;
+        appData.scenes.push({ name: name, members: [] });
+        document.getElementById('input-scene').value = "";
+        renderAdmin();
+    }
+
+    function toggleMemberInScene(sceneIdx, castName) {
+        const scene = appData.scenes[sceneIdx];
+        const idx = scene.members.indexOf(castName);
+        if(idx > -1) scene.members.splice(idx, 1);
+        else scene.members.push(castName);
+        renderAdmin();
+    }
+
+    function renderAdmin() {
+        // 役者リスト表示
+        document.getElementById('cast-container').innerHTML = appData.cast.map(c => `<span class="chip">${c}</span>`).join('');
+        
+        // シーンリスト表示
+        document.getElementById('scene-container').innerHTML = appData.scenes.map((s, idx) => `
+            <div class="scene-card">
+                <strong>${s.name}</strong>
+                <div class="cast-check-grid">
+                    ${appData.cast.map(c => `
+                        <label>
+                            <input type="checkbox" ${s.members.includes(c) ? 'checked' : ''} 
+                                   onchange="toggleMemberInScene(${idx}, '${c}')"> ${c}
+                        </label>
+                    `).join('')}
+                </div>
             </div>
         `).join('');
-    }
-
-    function createNewProject() {
-        const name = document.getElementById('newProjectName').value.trim();
-        if (!name) return alert("公演名を入れてください");
-        selectProject(name);
-    }
-
-    async function selectProject(name) {
-        currentProject = name;
-        document.getElementById('currentProjectTitle').innerText = "公演： " + name;
-        showPage('main');
-        // 本来はここでシート別のデータを取得しますが、今回は簡易化のため初期化
-        renderDateFormsPlaceholder(); 
-    }
-
-    function switchMode(mode) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-' + mode).classList.add('active');
-        document.querySelectorAll('.mode-content').forEach(c => c.style.display = 'none');
-        document.getElementById('mode-' + mode).style.display = 'block';
-    }
-
-    // 回答送信処理
-    async function submitData() {
-        const name = document.getElementById('memberName').value.trim();
-        if (!name) return alert("名前を入れてください");
         
-        toggleLoader(true);
-        const record = {
-            projectName: currentProject,
-            name: name,
-            answers: {
-                "5/15": { status: "参加" }, // 本来は入力UIから取得
-                "5/16": { status: "不参加" }
-            }
-        };
-
-        try {
-            await fetch(GAS_URL, { method: "POST", body: JSON.stringify(record) });
-            alert("送信完了！");
-            // 送信後、自動で表までスクロール
-            document.getElementById('resTable').scrollIntoView({ behavior: 'smooth' });
-            // データを再読込（本来はdoGetで最新のresponsesを取得）
-        } catch (e) {
-            alert("送信失敗");
-        }
-        toggleLoader(false);
+        renderMemberUI(); // 回答側のプルダウン等も同期
     }
 
-    // 簡易的な日付フォーム表示（プロトタイプ用）
-    function renderDateFormsPlaceholder() {
-        const div = document.getElementById('dateForms');
-        div.innerHTML = `
-            <div style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:10px;">
-                <strong>5/15 (金)</strong> 18:00〜21:00 <br>
-                <select><option>参加</option><option>不参加</option><option>途中</option></select>
-            </div>
-            <div style="background:#f9f9f9; padding:10px; border-radius:8px;">
-                <strong>5/16 (土)</strong> 13:00〜17:00 <br>
-                <select><option>参加</option><option>不参加</option><option>途中</option></select>
-            </div>
-        `;
+    // --- サーバー保存 ---
+    async function saveAllSettings() {
+        if(!currentProject) return;
+        const payload = {
+            type: "saveSettings",
+            projectName: currentProject,
+            settings: appData
+        };
+        await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
+        alert("設定を保存しました！");
+    }
+
+    // --- 役者用UI ---
+    function renderMemberUI() {
+        const select = document.getElementById('select-member-name');
+        select.innerHTML = '<option value="">自分の名前を選択</option>' + 
+            appData.cast.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    function switchTab(mode) {
+        document.getElementById('tab-member').classList.toggle('active', mode === 'member');
+        document.getElementById('tab-admin').classList.toggle('active', mode === 'admin');
+        document.getElementById('view-member').style.display = mode === 'member' ? 'block' : 'none';
+        document.getElementById('view-admin').style.display = mode === 'admin' ? 'block' : 'none';
     }
 </script>
+
 </body>
 </html>
