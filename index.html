@@ -1,265 +1,318 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>劇団調整ポータル Pro - シーン自動判定付</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <style>
-        :root { --main: #2563EB; --bg: #F1F5F9; --white: #ffffff; --border: #E2E8F0; --accent: #F59E0B; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
-        .container { max-width: 900px; margin: 0 auto; }
-        .card { background: var(--white); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .page { display: none; } .active { display: block; }
-        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-main { background: var(--main); color: white; width: 100%; }
-        .btn-sub { background: #64748B; color: white; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab { flex: 1; text-align: center; padding: 12px; background: #E2E8F0; border-radius: 8px; cursor: pointer; }
-        .tab.active { background: var(--main); color: white; }
-        
-        /* 提案エリアのスタイル */
-        .proposal-box { background: #FFFBEB; border: 2px solid #FEF3C7; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
-        .proposal-item { background: white; padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 5px solid var(--accent); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .ok-badge { background: #DCFCE7; color: #166534; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
-
-        .date-item { border-bottom: 1px solid var(--border); padding: 15px 0; }
-        .chip { background: #EEF2FF; padding: 5px 10px; border-radius: 15px; display: inline-block; margin: 2px; font-size: 13px; border: 1px solid #C7D2FE; }
-        .status-selector { display: flex; gap: 10px; margin-top: 8px; }
-        .time-input-group { margin-top: 10px; background: #F8FAFC; padding: 10px; border-radius: 8px; display: none; }
-        input[type="time"] { padding: 5px; border: 1px solid var(--border); border-radius: 4px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>劇団調整ポータル Pro - シーン自動判定付</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    :root { --main: #2563EB; --bg: #F1F5F9; --white: #ffffff; --border: #E2E8F0; --accent: #F59E0B; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .card { background: var(--white); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .page { display: none; } .active { display: block; }
+    .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .btn-main { background: var(--main); color: white; width: 100%; }
+    .btn-sub { background: #64748B; color: white; }
+    .btn-danger { background: #EF4444; color: white; padding: 4px 8px; font-size: 12px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab { flex: 1; text-align: center; padding: 12px; background: #E2E8F0; border-radius: 8px; cursor: pointer; }
+    .tab.active { background: var(--main); color: white; }
+    .proposal-box { background: #FFFBEB; border: 2px solid #FEF3C7; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+    .proposal-item { background: white; padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 5px solid var(--accent); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .ok-badge { background: #DCFCE7; color: #166534; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+    .date-item { border-bottom: 1px solid var(--border); padding: 15px 0; }
+    .chip { background: #EEF2FF; padding: 5px 10px; border-radius: 15px; display: inline-block; margin: 2px; font-size: 13px; border: 1px solid #C7D2FE; }
+    .status-selector { display: flex; gap: 10px; margin-top: 8px; }
+    .time-input-group { margin-top: 10px; background: #F8FAFC; padding: 10px; border-radius: 8px; display: none; }
+    input[type="time"] { padding: 5px; border: 1px solid var(--border); border-radius: 4px; }
+    #loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); display: none; align-items: center; justify-content: center; z-index: 9999; pointer-events: all; }
+    #loading-overlay.active { display: flex; }
+    .loader-card { background: white; padding: 24px 32px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,.2); font-weight: bold; text-align: center; }
+    .spinner { width: 28px; height: 28px; border: 4px solid #CBD5E1; border-top-color: var(--main); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 10px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 </head>
 <body>
+<div id="loading-overlay"><div class="loader-card"><div class="spinner"></div><div id="loading-text">通信中...</div></div></div>
 
 <div class="container">
-    <h1 id="project-title">劇団スケジュール管理</h1>
+  <h1 id="project-title">劇団スケジュール管理</h1>
 
-    <div id="page-select" class="page active">
-        <div class="card">
-            <h2>公演プロジェクトを選択</h2>
-            <div id="project-list">読み込み中...</div>
-            <input type="text" id="new-project-name" placeholder="新しい公演名を入力" style="width:70%; padding:10px; margin-top:20px; border-radius:6px; border:1px solid #ccc;">
-            <button class="btn btn-sub" onclick="initProject()">作成</button>
-        </div>
+  <div id="page-select" class="page active">
+    <div class="card">
+      <h2>公演プロジェクトを選択</h2>
+      <div id="project-list">読み込み中...</div>
+      <input type="text" id="new-project-name" placeholder="新しい公演名を入力" style="width:70%; padding:10px; margin-top:20px; border-radius:6px; border:1px solid #ccc;">
+      <button class="btn btn-sub" onclick="initProject()">作成</button>
+    </div>
+  </div>
+
+  <div id="page-main" class="page">
+    <div class="tabs">
+      <div id="tab-member" class="tab active" onclick="switchTab('member')">役者：回答</div>
+      <div id="tab-admin" class="tab" onclick="switchTab('admin')">演出：管理</div>
     </div>
 
-    <div id="page-main" class="page">
-        <div class="tabs">
-            <div id="tab-member" class="tab active" onclick="switchTab('member')">役者：回答</div>
-            <div id="tab-admin" class="tab" onclick="switchTab('admin')">演出：管理</div>
+    <div id="view-admin" style="display:none;">
+      <div class="proposal-box">
+        <h3 style="margin-top:0; color: #92400E;">💡 稽古可能なシーンの提案</h3>
+        <p style="font-size: 0.85rem; color: #B45309;">保存済みの回答状況から、必要な役者が揃っている日程を表示します。</p>
+        <div id="proposal-list">回答を読み込み中...</div>
+      </div>
+
+      <div class="card">
+        <h3>1. 役者の登録</h3>
+        <div style="display:flex; gap:10px;">
+          <input type="text" id="cast-name" style="flex:1; padding:8px;" placeholder="役者名">
+          <button class="btn btn-sub" onclick="addCast()">追加</button>
         </div>
+        <div id="admin-cast-list" style="margin-top:10px;"></div>
+      </div>
 
-        <!-- 演出設定・管理モード -->
-        <div id="view-admin" style="display:none;">
-            <!-- ★追加：稽古提案エリア -->
-            <div class="proposal-box">
-                <h3 style="margin-top:0; color: #92400E;">💡 稽古可能なシーンの提案</h3>
-                <p style="font-size: 0.85rem; color: #B45309;">役者の回答状況から、全員揃っている日程を表示しています。</p>
-                <div id="proposal-list">回答を読み込み中...</div>
-            </div>
-
-            <div class="card">
-                <h3>1. 役者の登録</h3>
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="cast-name" style="flex:1; padding:8px;" placeholder="役者名">
-                    <button class="btn btn-sub" onclick="addCast()">追加</button>
-                </div>
-                <div id="admin-cast-list" style="margin-top:10px;"></div>
-            </div>
-
-            <div class="card">
-                <h3>2. シーンの登録（香盤）</h3>
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="scene-name" style="flex:1; padding:8px;" placeholder="シーン名（例：1幕2場）">
-                    <button class="btn btn-sub" onclick="addScene()">シーン追加</button>
-                </div>
-                <div id="admin-scene-list" style="margin-top:10px;"></div>
-            </div>
-
-            <div class="card">
-                <h3>3. 稽古日程の追加</h3>
-                <input type="text" id="date-picker" placeholder="日程を選択" style="width:100%; padding:8px;">
-                <div style="margin-top:10px;">
-                    開始：<input type="time" id="start-time" value="18:00"> 〜 
-                    終了：<input type="time" id="end-time" value="22:00">
-                    <button class="btn btn-sub" onclick="addSchedule()">日程追加</button>
-                </div>
-                <div id="admin-schedule-list" style="margin-top:10px;"></div>
-            </div>
-            <button class="btn btn-main" style="padding:15px; font-size:1.1rem;" onclick="saveAllSettings()">☝ 全設定をサーバーに保存</button>
+      <div class="card">
+        <h3>2. シーンの登録（香盤）</h3>
+        <div style="display:flex; gap:10px;">
+          <input type="text" id="scene-name" style="flex:1; padding:8px;" placeholder="シーン名（例：1幕2場）">
+          <button class="btn btn-sub" onclick="addScene()">シーン追加</button>
         </div>
+        <div id="admin-scene-list" style="margin-top:10px;"></div>
+      </div>
 
-        <!-- 役者回答モード -->
-        <div id="view-member">
-            <div class="card">
-                <h3>名前を選択</h3>
-                <select id="member-select" style="width:100%; padding:10px;"></select>
-            </div>
-            <div class="card">
-                <h3>出欠回答</h3>
-                <div id="member-schedule-list"></div>
-                <button class="btn btn-main" style="margin-top:20px;" onclick="submitAttendance()">回答を送信</button>
-            </div>
+      <div class="card">
+        <h3>3. 稽古日程の追加</h3>
+        <input type="text" id="date-picker" placeholder="日程を選択" style="width:100%; padding:8px; box-sizing:border-box;">
+        <div style="margin-top:10px;">
+          開始：<input type="time" id="start-time" value="18:00"> 〜
+          終了：<input type="time" id="end-time" value="22:00">
+          <button class="btn btn-sub" onclick="addSchedule()">日程追加</button>
         </div>
+        <div id="admin-schedule-list" style="margin-top:10px;"></div>
+      </div>
+      <button class="btn btn-main" style="padding:15px; font-size:1.1rem;" onclick="saveAllSettings()">☝ 全設定をサーバーに保存</button>
     </div>
+
+    <div id="view-member">
+      <div class="card">
+        <h3>名前を選択</h3>
+        <select id="member-select" style="width:100%; padding:10px;"></select>
+      </div>
+      <div class="card">
+        <h3>出欠回答</h3>
+        <div id="member-schedule-list"></div>
+        <button class="btn btn-main" style="margin-top:20px;" onclick="submitAttendance()">回答を送信</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyrVB2uihyHmmdlVKV4anYpg0doUa24xZ3FsNaoh4UaAZryuFqo9imWB46ok4NtyGmnLw/exec";
-    let currentProject = "";
-    let appData = { cast: [], scenes: [], schedules: [] };
-    let responses = []; // 役者からの回答データ
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbxq-3qGuJkFj1ccn0hw-fAt1-ke9reoR40wPXDgJqHQixsaGB8kyx-SKhb8MWw97b6NeA/exec";
+  let currentProject = "";
+  let appData = { cast: [], scenes: [], schedules: [] };
+  let responses = [];
 
-    flatpickr("#date-picker", { mode: "single", dateFormat: "m/d" });
+  flatpickr("#date-picker", { mode: "single", dateFormat: "m/d" });
 
-    async function loadProjects() {
-        const res = await fetch(GAS_URL);
-        const data = await res.json();
-        document.getElementById('project-list').innerHTML = data.existingProjects.map(p => 
-            `<button class="btn btn-sub" style="margin:5px;" onclick="enterProject('${p}')">${p}</button>`
-        ).join('');
+  function setLoading(isLoading, text = "通信中...") {
+    document.getElementById('loading-text').innerText = text;
+    document.getElementById('loading-overlay').classList.toggle('active', isLoading);
+  }
+
+  function escapeHtml(str) {
+    return String(str ?? "").replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
+  }
+
+  async function apiFetch(url, options) {
+    setLoading(true);
+    try {
+      const res = await fetch(url, options);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } finally {
+      setLoading(false);
     }
-    loadProjects();
+  }
 
-    async function enterProject(name) {
-        currentProject = name;
-        document.getElementById('project-title').innerText = "公演：" + name;
-        document.getElementById('page-select').classList.remove('active');
-        document.getElementById('page-main').classList.add('active');
-        
-        const res = await fetch(`${GAS_URL}?project=${encodeURIComponent(name)}`);
-        const data = await res.json();
-        if(data.settings) appData = data.settings;
-        responses = data.responses || []; // GAS側で回答も返すように修正済みと想定
-        renderAll();
+  async function loadProjects() {
+    try {
+      const data = await apiFetch(GAS_URL);
+      const projects = data.existingProjects || [];
+      document.getElementById('project-list').innerHTML = projects.length
+        ? projects.map(p => `<button class="btn btn-sub project-btn" style="margin:5px;" data-project="${escapeHtml(p)}">${escapeHtml(p)}</button>`).join('')
+        : 'まだプロジェクトがありません。';
+      document.querySelectorAll('.project-btn').forEach(btn => {
+        btn.addEventListener('click', () => enterProject(btn.dataset.project));
+      });
+    } catch (err) {
+      alert('プロジェクト一覧の読み込みに失敗しました: ' + err.message);
+      document.getElementById('project-list').innerHTML = '読み込み失敗';
+    }
+  }
+  loadProjects();
+
+  async function enterProject(name) {
+    currentProject = name;
+    document.getElementById('project-title').innerText = "公演：" + name;
+    document.getElementById('page-select').classList.remove('active');
+    document.getElementById('page-main').classList.add('active');
+    try {
+      const data = await apiFetch(`${GAS_URL}?project=${encodeURIComponent(name)}`);
+      appData = data.settings || { cast: [], scenes: [], schedules: [] };
+      responses = data.responses || [];
+      renderAll();
+    } catch (err) {
+      alert('プロジェクトの読み込みに失敗しました: ' + err.message);
+    }
+  }
+
+  function initProject() {
+    const n = document.getElementById('new-project-name').value.trim();
+    if (n) enterProject(n);
+  }
+
+  function addCast() {
+    const n = document.getElementById('cast-name').value.trim();
+    if (!n) return;
+    if (!appData.cast.includes(n)) appData.cast.push(n);
+    document.getElementById('cast-name').value = "";
+    renderAll();
+  }
+
+  function removeCast(idx) {
+    const name = appData.cast[idx];
+    appData.cast.splice(idx, 1);
+    appData.scenes.forEach(s => s.members = s.members.filter(m => m !== name));
+    renderAll();
+  }
+
+  function addScene() {
+    const n = document.getElementById('scene-name').value.trim();
+    if (n) appData.scenes.push({ name: n, members: [] });
+    document.getElementById('scene-name').value = "";
+    renderAll();
+  }
+
+  function toggleSceneMember(sIdx, cIdx) {
+    const cName = appData.cast[cIdx];
+    const s = appData.scenes[sIdx];
+    const idx = s.members.indexOf(cName);
+    if (idx > -1) s.members.splice(idx, 1);
+    else s.members.push(cName);
+    renderAll();
+  }
+
+  function addSchedule() {
+    const d = document.getElementById('date-picker').value;
+    const s = document.getElementById('start-time').value;
+    const e = document.getElementById('end-time').value;
+    if (d) appData.schedules.push({ date: d, start: s, end: e });
+    renderAll();
+  }
+
+  function onStatusChange(idx) {
+    const st = document.querySelector(`input[name="st-${idx}"]:checked`)?.value;
+    document.getElementById(`t-${idx}`).style.display = st === '途中' ? 'block' : 'none';
+  }
+
+  function renderAll() {
+    document.getElementById('admin-cast-list').innerHTML = appData.cast.length
+      ? appData.cast.map((c, idx) => `<span class="chip">${escapeHtml(c)} <button class="btn btn-danger" onclick="removeCast(${idx})">×</button></span>`).join('')
+      : '<small>まだ役者が登録されていません。</small>';
+
+    document.getElementById('admin-scene-list').innerHTML = appData.scenes.map((s, sIdx) => `
+      <div style="border:1px solid #ddd; padding:10px; margin-bottom:5px; border-radius:8px;">
+        <strong>${escapeHtml(s.name)}</strong><br>
+        ${appData.cast.map((c, cIdx) => `
+          <label style="font-size:12px; margin-right:5px;">
+            <input type="checkbox" ${s.members.includes(c) ? 'checked' : ''} onchange="toggleSceneMember(${sIdx}, ${cIdx})">${escapeHtml(c)}
+          </label>
+        `).join('')}
+      </div>
+    `).join('');
+
+    document.getElementById('admin-schedule-list').innerHTML = appData.schedules.map(s => `<span class="chip">${escapeHtml(s.date)} ${escapeHtml(s.start)}〜${escapeHtml(s.end)}</span>`).join('');
+
+    document.getElementById('member-select').innerHTML = '<option value="">名前を選択</option>' + appData.cast.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+    document.getElementById('member-schedule-list').innerHTML = appData.schedules.map((s, idx) => `
+      <div class="date-item">
+        <strong>${escapeHtml(s.date)}</strong> <small>(${escapeHtml(s.start)}〜${escapeHtml(s.end)})</small>
+        <div class="status-selector">
+          <label><input type="radio" name="st-${idx}" value="参加" onchange="onStatusChange(${idx})"> 参加</label>
+          <label><input type="radio" name="st-${idx}" value="不参加" onchange="onStatusChange(${idx})"> 不参加</label>
+          <label><input type="radio" name="st-${idx}" value="途中" onchange="onStatusChange(${idx})"> 途中</label>
+        </div>
+        <div id="t-${idx}" class="time-input-group">
+          <input type="time" id="f-${idx}" value="${escapeHtml(s.start)}"> 〜 <input type="time" id="to-${idx}" value="${escapeHtml(s.end)}">
+        </div>
+      </div>
+    `).join('');
+
+    updateProposals();
+  }
+
+  function updateProposals() {
+    const listDiv = document.getElementById('proposal-list');
+    if (responses.length === 0) {
+      listDiv.innerHTML = "まだ役者からの回答がありません。";
+      return;
     }
 
-    function initProject() {
-        const n = document.getElementById('new-project-name').value;
-        if(n) enterProject(n);
-    }
-
-    function addCast() {
-        const n = document.getElementById('cast-name').value;
-        if(n) appData.cast.push(n);
-        document.getElementById('cast-name').value = "";
-        renderAll();
-    }
-
-    function addScene() {
-        const n = document.getElementById('scene-name').value;
-        if(n) appData.scenes.push({ name: n, members: [] });
-        document.getElementById('scene-name').value = "";
-        renderAll();
-    }
-
-    function toggleSceneMember(sIdx, cName) {
-        const s = appData.scenes[sIdx];
-        const idx = s.members.indexOf(cName);
-        if(idx > -1) s.members.splice(idx, 1);
-        else s.members.push(cName);
-        renderAll();
-    }
-
-    function addSchedule() {
-        const d = document.getElementById('date-picker').value;
-        const s = document.getElementById('start-time').value;
-        const e = document.getElementById('end-time').value;
-        if(d) appData.schedules.push({ date: d, start: s, end: e });
-        renderAll();
-    }
-
-    function renderAll() {
-        // 管理：シーン一覧
-        document.getElementById('admin-scene-list').innerHTML = appData.scenes.map((s, sIdx) => `
-            <div style="border:1px solid #ddd; padding:10px; margin-bottom:5px; border-radius:8px;">
-                <strong>${s.name}</strong><br>
-                ${appData.cast.map(c => `
-                    <label style="font-size:12px; margin-right:5px;">
-                        <input type="checkbox" ${s.members.includes(c)?'checked':''} onchange="toggleSceneMember(${sIdx},'${c}')">${c}
-                    </label>
-                `).join('')}
-            </div>
-        `).join('');
-
-        // 管理：日程表示
-        document.getElementById('admin-schedule-list').innerHTML = appData.schedules.map(s => `<span class="chip">${s.date}</span>`).join('');
-        
-        // 役者：UI
-        document.getElementById('member-select').innerHTML = '<option>名前を選択</option>' + appData.cast.map(c => `<option value="${c}">${c}</option>`).join('');
-        document.getElementById('member-schedule-list').innerHTML = appData.schedules.map((s, idx) => `
-            <div class="date-item">
-                <strong>${s.date}</strong> <small>(${s.start}〜${s.end})</small>
-                <div class="status-selector">
-                    <label><input type="radio" name="st-${idx}" value="参加"> 参加</label>
-                    <label><input type="radio" name="st-${idx}" value="不参加"> 不参加</label>
-                    <label><input type="radio" name="st-${idx}" value="途中" onchange="document.getElementById('t-${idx}').style.display='block'"> 途中</label>
-                </div>
-                <div id="t-${idx}" class="time-input-group">
-                    <input type="time" id="f-${idx}" value="${s.start}"> 〜 <input type="time" id="to-${idx}" value="${s.end}">
-                </div>
-            </div>
-        `).join('');
-
-        updateProposals(); // ★提案機能を実行
-    }
-
-    // ★重要：シーン提案ロジック
-    function updateProposals() {
-        const listDiv = document.getElementById('proposal-list');
-        if (responses.length === 0) {
-            listDiv.innerHTML = "まだ役者からの回答がありません。";
-            return;
-        }
-
-        let html = "";
-        appData.schedules.forEach(sched => {
-            let possibleScenes = [];
-            appData.scenes.forEach(scene => {
-                // そのシーンの全メンバーが、この日に「不参加」と言っていないかチェック
-                const isPossible = scene.members.every(mName => {
-                    const r = responses.find(res => res.name === mName);
-                    return r && r.answers[sched.date] && !r.answers[sched.date].includes("不参加");
-                });
-                if (isPossible && scene.members.length > 0) possibleScenes.push(scene.name);
-            });
-
-            if (possibleScenes.length > 0) {
-                html += `
-                    <div class="proposal-item">
-                        <strong>📅 ${sched.date}</strong> <span class="ok-badge">稽古可能</span><br>
-                        <small>可能なシーン: ${possibleScenes.join(', ')}</small>
-                    </div>`;
-            }
+    let html = "";
+    appData.schedules.forEach(sched => {
+      const possibleScenes = [];
+      appData.scenes.forEach(scene => {
+        const isPossible = scene.members.length > 0 && scene.members.every(mName => {
+          const r = responses.find(res => res.name === mName);
+          return r && r.answers && r.answers[sched.date] && !String(r.answers[sched.date]).includes("不参加");
         });
-        listDiv.innerHTML = html || "全員揃う日程がありません...";
+        if (isPossible) possibleScenes.push(scene.name);
+      });
+
+      if (possibleScenes.length > 0) {
+        html += `<div class="proposal-item"><strong>📅 ${escapeHtml(sched.date)}</strong> <span class="ok-badge">稽古可能</span><br><small>可能なシーン: ${possibleScenes.map(escapeHtml).join(', ')}</small></div>`;
+      }
+    });
+    listDiv.innerHTML = html || "必要な役者が揃う日程がありません。";
+  }
+
+  async function saveAllSettings() {
+    try {
+      await apiFetch(GAS_URL, { method: "POST", body: JSON.stringify({ type: "saveSettings", projectName: currentProject, settings: appData }) });
+      alert("保存完了！");
+    } catch (err) {
+      alert('保存に失敗しました: ' + err.message);
+    }
+  }
+
+  async function submitAttendance() {
+    const name = document.getElementById('member-select').value;
+    if (!name) return alert('名前を選択してください。');
+
+    const answers = {};
+    for (let i = 0; i < appData.schedules.length; i++) {
+      const s = appData.schedules[i];
+      const st = document.querySelector(`input[name="st-${i}"]:checked`)?.value;
+      if (!st) return alert(`${s.date} の出欠を選択してください。`);
+      answers[s.date] = st === "途中" ? `途中(${document.getElementById('f-'+i).value}〜${document.getElementById('to-'+i).value})` : st;
     }
 
-    async function saveAllSettings() {
-        await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ type: "saveSettings", projectName: currentProject, settings: appData }) });
-        alert("保存完了！");
+    try {
+      await apiFetch(GAS_URL, { method: "POST", body: JSON.stringify({ projectName: currentProject, name, answers }) });
+      alert("送信完了！");
+      await enterProject(currentProject); // reloadせず、保存済み回答を再取得
+    } catch (err) {
+      alert('送信に失敗しました: ' + err.message);
     }
+  }
 
-    async function submitAttendance() {
-        const name = document.getElementById('member-select').value;
-        const answers = {};
-        appData.schedules.forEach((s, i) => {
-            const st = document.querySelector(`input[name="st-${i}"]:checked`)?.value;
-            answers[s.date] = st === "途中" ? `途中(${document.getElementById('f-'+i).value}〜)` : st;
-        });
-        await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ projectName: currentProject, name, answers }) });
-        alert("送信完了！");
-        location.reload();
-    }
-
-    function switchTab(mode) {
-        document.getElementById('view-member').style.display = mode === 'member' ? 'block' : 'none';
-        document.getElementById('view-admin').style.display = mode === 'admin' ? 'block' : 'none';
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.getElementById('tab-' + mode).classList.add('active');
-    }
+  function switchTab(mode) {
+    document.getElementById('view-member').style.display = mode === 'member' ? 'block' : 'none';
+    document.getElementById('view-admin').style.display = mode === 'admin' ? 'block' : 'none';
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + mode).classList.add('active');
+  }
 </script>
 </body>
 </html>
