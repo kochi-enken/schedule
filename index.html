@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-  <title>劇団調整ポータル Pro - シーン自動判定付</title>
+  <title>劇団スケジュール調整サイト</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <style>
     :root {
@@ -1384,10 +1384,142 @@
       color: var(--muted-light);
     }
 
+
+    /* v10.5: シーン登録のスクロール・タップ安定化 */
+    .scene-box {
+      touch-action: pan-y !important;
+    }
+
+    .member-toggle-list,
+    .toggle-btn {
+      touch-action: pan-y !important;
+    }
+
+    .drag-handle,
+    .drag-handle * {
+      touch-action: none !important;
+    }
+
+    .toggle-btn {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+
+    /* v10.6: 役者名タップ時の画面移動をさらに抑制 */
+    .toggle-btn {
+      -webkit-tap-highlight-color: transparent;
+      outline: none !important;
+    }
+
+    .toggle-btn:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+
+    /* v10.8: 役者登録修正時の画面移動を抑制 */
+    #admin-cast-list .chip,
+    #admin-cast-list .chip-delete {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    #admin-cast-list .chip-delete:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+
+    /* v10.9: シーン役者ボタンは部分更新にし、画面ジャンプを防ぐ */
+    .member-toggle-list .toggle-btn {
+      touch-action: manipulation !important;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+
+    /* v11.0: 中央付近のシーンカードで起きるスクロール補正を抑制 */
+    #proposal-list,
+    #selected-practice-schedule,
+    #attendance-cross-table {
+      overflow-anchor: none;
+    }
+
+    #admin-scene-list {
+      overflow-anchor: auto;
+    }
+
+
+    /* v11.2: 役者名タップ時の一瞬の画面ズレを抑制 */
+    html,
+    body {
+      overflow-anchor: none;
+    }
+
+    .toggle-btn {
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+
+
+    /* v11.4: 役者名タップ時のスクロール補正を安定化 */
+    #proposal-list,
+    #selected-practice-schedule,
+    #attendance-cross-table,
+    #view-admin {
+      overflow-anchor: none;
+    }
+
+    .member-toggle-list .toggle-btn {
+      touch-action: manipulation !important;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+      outline: none !important;
+    }
+
+    .member-toggle-list .toggle-btn:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+
+    /* v11.5: 稽古可能シーンの手動更新 */
+    .recalculate-proposals-btn {
+      width: 100%;
+      margin: 12px 0 10px;
+      background: #ffffff;
+      color: var(--main);
+      border: 1px solid var(--main);
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .recalculate-proposals-btn:hover {
+      background: #DBEAFE;
+    }
+
+    .recalculate-note {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+
+    /* v11.7: シーン役者名タップの反応速度改善 */
+    .member-toggle-list .toggle-btn {
+      touch-action: pan-y !important;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
   </style>
 </head>
 <body>
-<header class="site-header"><div class="site-header-inner"><div onclick="goHome()" title="プロジェクト選択へ戻る" style="cursor:pointer;"><div class="site-title">劇団スケジュール管理</div></div></div></header>
+<header class="site-header"><div class="site-header-inner"><div onclick="goHome()" title="プロジェクト選択へ戻る" style="cursor:pointer;"><div class="site-title">劇団スケジュール調整サイト</div></div></div></header>
 <div id="loading-overlay"><div class="loader-card"><div class="spinner"></div><div id="loading-text">通信中...</div></div></div>
 
 <div class="container">
@@ -1419,6 +1551,8 @@
         
         <h3 class="practice-section-title">稽古可能なシーン</h3>
         <p class="practice-section-note">日ごとに練習したいシーンを選んでください。チェックしたシーンが稽古スケジュール表に反映されます。</p>
+        <button type="button" class="recalculate-proposals-btn" onclick="recalculatePracticeViews()">稽古可能シーンを更新</button>
+        <p class="recalculate-note">シーン登録で役者を選び直した後は、このボタンを押すと提案と表に反映されます。</p>
         <div id="proposal-list">回答を読み込み中...</div>
         <div id="selected-practice-schedule" class="selected-practice-box"></div>
         <button type="button" id="save-practice-schedule-btn" class="save-practice-schedule-btn" onclick="savePracticeSchedule()" disabled>スケジュールを保存</button>
@@ -1495,6 +1629,7 @@
   let memberLastSubmittedSignature = "";
   const selectedPracticeItems = new Map();
   let savedPracticeScheduleSignature = "";
+  let practiceViewsNeedRecalculate = false;
 
   flatpickr("#date-picker", { mode: "multiple", dateFormat: "m/d" });
 
@@ -1563,8 +1698,8 @@
     if (!date) return String(dateText || "");
 
     const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = (date.getMonth() + 1);
+    const dd = date.getDate();
     return `${mm}/${dd} (${weekdays[date.getDay()]})`;
   }
 
@@ -1572,8 +1707,8 @@
     const date = parseScheduleDate(dateText);
     if (!date) return String(dateText || "").trim();
 
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = (date.getMonth() + 1);
+    const dd = date.getDate();
     return `${mm}/${dd}`;
   }
 
@@ -1903,20 +2038,24 @@
   }
 
   function addCast() {
-    const n = document.getElementById('cast-name').value.trim();
-    if (!n) return;
-    if (!appData.cast.includes(n)) appData.cast.push(n);
-    document.getElementById('cast-name').value = "";
-    markSettingsDirty();
-    renderAll();
+    preserveScrollDuring(() => {
+      const n = document.getElementById('cast-name').value.trim();
+      if (!n) return;
+      if (!appData.cast.includes(n)) appData.cast.push(n);
+      document.getElementById('cast-name').value = "";
+      markSettingsDirty();
+      renderAll();
+    });
   }
 
   function removeCast(idx) {
-    const name = appData.cast[idx];
-    appData.cast.splice(idx, 1);
-    appData.scenes.forEach(s => s.members = s.members.filter(m => m !== name));
-    markSettingsDirty();
-    renderAll();
+    preserveScrollDuring(() => {
+      const name = appData.cast[idx];
+      appData.cast.splice(idx, 1);
+      appData.scenes.forEach(s => s.members = s.members.filter(m => m !== name));
+      markSettingsDirty();
+      renderAll();
+    });
   }
 
   function addScene() {
@@ -2080,14 +2219,140 @@
     renderAll();
   }
 
-  function toggleSceneMember(sIdx, cIdx) {
+
+  let sceneMemberScrollLockTimer = null;
+
+  function preserveScrollDuring(callback) {
+    const x = window.scrollX;
+    const y = window.scrollY;
+
+    const active = document.activeElement;
+    if (active && typeof active.blur === "function") active.blur();
+
+    callback();
+
+    window.clearTimeout(sceneMemberScrollLockTimer);
+
+    const restore = () => window.scrollTo({ left: x, top: y, behavior: "auto" });
+    restore();
+    requestAnimationFrame(restore);
+    sceneMemberScrollLockTimer = window.setTimeout(restore, 80);
+  }
+
+
+  function preserveElementViewportPosition(element, callback) {
+    const beforeTop = element && document.body.contains(element) ? element.getBoundingClientRect().top : null;
+    const beforeLeft = element && document.body.contains(element) ? element.getBoundingClientRect().left : null;
+    const beforeScrollX = window.scrollX;
+    const beforeScrollY = window.scrollY;
+
+    const active = document.activeElement;
+    if (active && typeof active.blur === "function") active.blur();
+
+    callback();
+
+    const restore = () => {
+      if (!element || !document.body.contains(element) || beforeTop === null) {
+        window.scrollTo({ left: beforeScrollX, top: beforeScrollY, behavior: "auto" });
+        return;
+      }
+
+      const afterTop = element.getBoundingClientRect().top;
+      const afterLeft = element.getBoundingClientRect().left;
+      const deltaY = afterTop - beforeTop;
+      const deltaX = afterLeft - beforeLeft;
+
+      if (Math.abs(deltaY) > 0.5 || Math.abs(deltaX) > 0.5) {
+        window.scrollBy({ left: deltaX, top: deltaY, behavior: "auto" });
+      }
+    };
+
+    // DOM更新直後に即補正し、Safariの遅延補正にも追従する
+    restore();
+    requestAnimationFrame(restore);
+    setTimeout(restore, 0);
+    setTimeout(restore, 80);
+  }
+
+
+
+
+  const sceneMemberPointerState = {
+    active: false,
+    moved: false,
+    startX: 0,
+    startY: 0
+  };
+
+  function onSceneMemberPointerDown(event) {
+    sceneMemberPointerState.active = true;
+    sceneMemberPointerState.moved = false;
+    sceneMemberPointerState.startX = event.clientX || 0;
+    sceneMemberPointerState.startY = event.clientY || 0;
+  }
+
+  function onSceneMemberPointerMove(event) {
+    if (!sceneMemberPointerState.active) return;
+
+    const dx = Math.abs((event.clientX || 0) - sceneMemberPointerState.startX);
+    const dy = Math.abs((event.clientY || 0) - sceneMemberPointerState.startY);
+
+    if (dx > 6 || dy > 6) {
+      sceneMemberPointerState.moved = true;
+    }
+  }
+
+  function onSceneMemberPointerUp(event, sIdx, cIdx, buttonEl) {
+    if (!sceneMemberPointerState.active) return;
+    sceneMemberPointerState.active = false;
+
+    if (sceneMemberPointerState.moved) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    toggleSceneMember(sIdx, cIdx, buttonEl);
+  }
+
+  function markPracticeViewsStale() {
+    practiceViewsNeedRecalculate = true;
+    const btn = document.querySelector('.recalculate-proposals-btn');
+    if (btn) btn.textContent = '稽古可能シーンを更新';
+  }
+
+  function recalculatePracticeViews() {
+    updateProposals();
+    renderCrossTable();
+    updateAdminButtonStates();
+    updatePracticeScheduleSaveButton();
+    practiceViewsNeedRecalculate = false;
+  }
+
+  function toggleSceneMember(sIdx, cIdx, buttonEl = null) {
     const cName = appData.cast[cIdx];
     const s = appData.scenes[sIdx];
+    if (!cName || !s) return;
+
     const idx = s.members.indexOf(cName);
+    const isNowActive = idx === -1;
+
     if (idx > -1) s.members.splice(idx, 1);
     else s.members.push(cName);
+
+    if (buttonEl) {
+      buttonEl.classList.toggle('active', isNowActive);
+    } else {
+      const selector = `.scene-box[data-scene-index="${sIdx}"] .toggle-btn`;
+      const buttons = document.querySelectorAll(selector);
+      const target = buttons[cIdx];
+      if (target) target.classList.toggle('active', isNowActive);
+    }
+
     markSettingsDirty();
-    renderAll();
+    updateAdminButtonStates();
+
+    // 画面の高さが変わる提案欄・表はここでは更新しない。
+    // これにより役者名タップ時に一瞬も画面が動かない。
+    markPracticeViewsStale();
   }
 
   function addSchedule() {
@@ -2212,7 +2477,7 @@
 
   function renderAll() {
     document.getElementById('admin-cast-list').innerHTML = appData.cast.length
-      ? appData.cast.map((c, idx) => `<span class="chip">${escapeHtml(c)} <button class="chip-delete" onclick="removeCast(${idx})" aria-label="役者を削除">×</button></span>`).join('')
+      ? appData.cast.map((c, idx) => `<span class="chip">${escapeHtml(c)} <button class="chip-delete" onclick="event.preventDefault(); event.stopPropagation(); removeCast(${idx})" aria-label="役者を削除">×</button></span>`).join('')
       : '';
 
     document.getElementById('admin-scene-list').innerHTML = appData.scenes.map((s, sIdx) => `
@@ -2228,7 +2493,7 @@
         </div>
         <div class="member-toggle-list">
           ${appData.cast.map((c, cIdx) => `
-            <button type="button" class="toggle-btn ${s.members.includes(c) ? 'active' : ''}" onclick="toggleSceneMember(${sIdx}, ${cIdx})">${escapeHtml(c)}</button>
+            <button type="button" class="toggle-btn ${s.members.includes(c) ? 'active' : ''}" onpointerdown="onSceneMemberPointerDown(event)" onpointermove="onSceneMemberPointerMove(event)" onpointerup="onSceneMemberPointerUp(event, ${sIdx}, ${cIdx}, this)" onclick="event.preventDefault(); event.stopPropagation();">${escapeHtml(c)}</button>
           `).join('')}
         </div>
       </div>
@@ -2269,6 +2534,7 @@
     updateAdminButtonStates();
     updateSubmitButtonState();
     updateMemberAnswerVisibility();
+    practiceViewsNeedRecalculate = false;
   }
 
 
@@ -2569,10 +2835,14 @@
           const key = makePracticeKey(sched.date, scene.name, timeText);
           validKeys.add(key);
 
+          const isLimitedTime = possibleStart !== timeToMin(sched.start) || possibleEnd !== timeToMin(sched.end);
+          const sceneLabel = isLimitedTime ? `${scene.name} (${timeText})` : scene.name;
+
           const item = {
             date: sched.date,
             time: timeText,
-            scene: scene.name,
+            scene: sceneLabel,
+            rawScene: scene.name,
             members: memberText
           };
 
@@ -2673,11 +2943,15 @@
       const updated = { name, answers, memo: "", timestamp: new Date().toISOString() };
       if (idx >= 0) responses[idx] = updated;
       else responses.push(updated);
+      const submitScrollX = window.scrollX;
+      const submitScrollY = window.scrollY;
       renderAll();
       document.getElementById('member-select').value = name;
+      updateMemberAnswerVisibility();
       fillPreviousAttendance();
       memberLastSubmittedSignature = getCurrentAttendanceSignature();
       updateSubmitButtonState();
+      requestAnimationFrame(() => window.scrollTo({ left: submitScrollX, top: submitScrollY, behavior: "auto" }));
       alert("送信完了！");
     } catch (err) {
       alert('送信に失敗しました: ' + err.message);
