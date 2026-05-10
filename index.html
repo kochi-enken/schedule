@@ -793,8 +793,8 @@
       align-items: center !important;
       padding: 7px 0 !important;
     }
-    .proposal-scene-line span {
-      color: var(--text) !important;
+    .proposal-scene-line > span {
+      color: var(--text);
     }
     .proposal-scene-line input[type="checkbox"] {
       width: 18px !important;
@@ -822,8 +822,8 @@
       padding: 8px 0 !important;
     }
 
-    .proposal-scene-line span {
-      color: var(--text) !important;
+    .proposal-scene-line > span {
+      color: var(--text) ;
       font-weight: 500;
     }
 
@@ -1516,6 +1516,37 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+
+    /* v11.8: 稽古可能シーン内の役者名バッジ */
+    .proposal-member-badges {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .proposal-member-badge {
+      background: #4F83F1;
+      color: var(--white);
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: none;
+      line-height: 1.2;
+      display: inline-flex;
+      align-items: center;
+    }
+
+
+    /* v11.9: 参加不可役者バッジ */
+    .proposal-member-badge.unavailable {
+      background: #CBD5E1;
+      color: #ffffff;
+      font-weight: 700;
+    }
+
   </style>
 </head>
 <body>
@@ -1551,7 +1582,7 @@
         
         <h3 class="practice-section-title">稽古可能なシーン</h3>
         <p class="practice-section-note">日ごとに練習したいシーンを選んでください。チェックしたシーンが稽古スケジュール表に反映されます。</p>
-        <button type="button" class="recalculate-proposals-btn" onclick="recalculatePracticeViews()">稽古可能シーンを更新</button>
+        <button type="button" class="recalculate-proposals-btn" onclick="recalculatePracticeViews()">スケジュールを更新</button>
         <p class="recalculate-note">シーン登録で役者を選び直した後は、このボタンを押すと提案と表に反映されます。</p>
         <div id="proposal-list">回答を読み込み中...</div>
         <div id="selected-practice-schedule" class="selected-practice-box"></div>
@@ -2316,7 +2347,7 @@
   function markPracticeViewsStale() {
     practiceViewsNeedRecalculate = true;
     const btn = document.querySelector('.recalculate-proposals-btn');
-    if (btn) btn.textContent = '稽古可能シーンを更新';
+    if (btn) btn.textContent = 'スケジュールを更新';
   }
 
   function recalculatePracticeViews() {
@@ -2787,6 +2818,25 @@
     updatePracticeScheduleSaveButton();
   }
 
+
+  function renderMemberBadges(memberItems) {
+    if (Array.isArray(memberItems)) {
+      return memberItems
+        .map(item => {
+          const cls = item.available ? "proposal-member-badge" : "proposal-member-badge unavailable";
+          return `<span class="${cls}">${escapeHtml(item.label || item.name || "")}</span>`;
+        })
+        .join("");
+    }
+
+    return String(memberItems || "")
+      .split("、")
+      .map(name => name.trim())
+      .filter(Boolean)
+      .map(name => `<span class="proposal-member-badge">${escapeHtml(name)}</span>`)
+      .join("");
+  }
+
   function updateProposals() {
     const listDiv = document.getElementById('proposal-list');
     if (responses.length === 0) {
@@ -2805,45 +2855,76 @@
       appData.scenes.forEach(scene => {
         if (scene.members.length === 0) return;
 
-        let possibleStart = timeToMin(sched.start);
-        let possibleEnd = timeToMin(sched.end);
-        let ok = true;
-        const availableMembers = [];
+        let hasAvailableMember = false;
+        let longestMember = null;
+        let longestDuration = -1;
+
+        const memberBadges = [];
+        const availableMemberLabels = [];
 
         scene.members.forEach(mName => {
           const r = getLatestResponse(mName);
           const parsed = parseAnswer(r?.answers?.[sched.date], sched);
-          if (!r || parsed.status === "未回答" || parsed.status === "不参加") {
-            ok = false;
-            return;
-          }
 
-          possibleStart = Math.max(possibleStart, parsed.start);
-          possibleEnd = Math.min(possibleEnd, parsed.end);
+          const available = !!r
+            && parsed.status !== "未回答"
+            && parsed.status !== "不参加"
+            && parsed.start != null
+            && parsed.end != null
+            && parsed.start < parsed.end;
 
-          if (parsed.status === "途中") {
-            const detail = parsed.detail || `${minToTime(parsed.start)}〜${minToTime(parsed.end)}`;
-            availableMembers.push(`${mName}(${detail})`);
+          if (available) {
+            hasAvailableMember = true;
+
+            const detail = parsed.status === "途中"
+              ? (parsed.detail || `${minToTime(parsed.start)}〜${minToTime(parsed.end)}`)
+              : "";
+
+            const label = detail ? `${mName}(${detail})` : mName;
+
+            memberBadges.push({
+              name: mName,
+              label,
+              available: true
+            });
+
+            availableMemberLabels.push(label);
+
+            const duration = parsed.end - parsed.start;
+
+            if (duration > longestDuration) {
+              longestDuration = duration;
+              longestMember = parsed;
+            }
           } else {
-            availableMembers.push(mName);
+            memberBadges.push({
+              name: mName,
+              label: mName,
+              available: false
+            });
           }
         });
 
-        if (ok && possibleStart < possibleEnd) {
-          const timeText = `${minToTime(possibleStart)}〜${minToTime(possibleEnd)}`;
-          const memberText = availableMembers.join('、');
+        if (hasAvailableMember && longestMember) {
+          const timeText = `${minToTime(longestMember.start)}〜${minToTime(longestMember.end)}`;
+
           const key = makePracticeKey(sched.date, scene.name, timeText);
           validKeys.add(key);
 
-          const isLimitedTime = possibleStart !== timeToMin(sched.start) || possibleEnd !== timeToMin(sched.end);
-          const sceneLabel = isLimitedTime ? `${scene.name} (${timeText})` : scene.name;
+          const isLimitedTime =
+            longestMember.start !== timeToMin(sched.start) ||
+            longestMember.end !== timeToMin(sched.end);
+
+          const sceneLabel = isLimitedTime
+            ? `${scene.name} (${timeText})`
+            : scene.name;
 
           const item = {
             date: sched.date,
             time: timeText,
             scene: sceneLabel,
             rawScene: scene.name,
-            members: memberText
+            members: availableMemberLabels.join('、')
           };
 
           const checked = selectedPracticeItems.has(key) ? 'checked' : '';
@@ -2851,7 +2932,7 @@
           sceneItems.push(`
             <label class="proposal-scene-line">
               <input type="checkbox" ${checked} onchange='togglePracticeSelection(${jsString(key)}, ${JSON.stringify(item)})'>
-              <span>${escapeHtml(scene.name)}：${escapeHtml(timeText)} / ${escapeHtml(memberText)}</span>
+              <span>${escapeHtml(scene.name)}：${escapeHtml(timeText)}<span class="proposal-member-badges">${renderMemberBadges(memberBadges)}</span></span>
             </label>
           `);
         }
@@ -2860,7 +2941,7 @@
       if (sceneItems.length > 0) {
         html += `
           <div class="proposal-item">
-            <strong>${escapeHtml(formatScheduleDate(sched.date))}</strong> <span class="ok-badge">稽古可能</span><br>
+            <strong>${escapeHtml(formatScheduleDate(sched.date))}</strong><br>
             ${sceneItems.join('')}
           </div>`;
       }
